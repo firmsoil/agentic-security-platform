@@ -160,7 +160,7 @@ edges:
     rationale: >
       getInformation queries the `embeddings` table by cosine distance;
       the matching rows are concatenated into the response context.
-  - type: WRITES_TO
+  - type: WRITES
     source: tool_add_resource
     target: rag_index
     rationale: >
