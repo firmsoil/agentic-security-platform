@@ -42,26 +42,34 @@ expected_nodes:
     id: "Container:ai-sdk-preview-rag"
     node_type: Container
 
-  # CONFIRMED — Node SDK→Model map matches `ai` (Vercel AI SDK) +
-  # `@ai-sdk/openai` in package.json. The Vercel AI SDK's `ai` package
-  # itself emits a `vercel-ai:router` Model node (provider determined
-  # at runtime); the provider package adds a concrete model.
+  # CONFIRMED via reconciliation 2026-04-29 — Node SDK→Model map produces
+  # Model:vercel-ai:router from the `ai` package. There is no concrete
+  # provider package in package.json (only `@ai-sdk/react` for UI hooks);
+  # the actual model is configured at runtime in the chat route via
+  # `streamText({ model: openai('gpt-4o') })` or similar. The static
+  # scanner cannot see runtime-configured models and the LLM scanner
+  # doesn't emit Model nodes by design — so the router IS the model
+  # for this target's graph.
   model_router:
     id: "Model:vercel-ai:router"
     node_type: Model
-  model_concrete:
-    id: "Model:openai:gpt-4o"
-    node_type: Model
 
-  # PREDICTED — Vercel AI SDK convention: tools are registered as
-  # `tools: { getInformation: tool({...}), addResource: tool({...}) }`
-  # in the streamText call inside app/api/chat/route.ts. The LLM
-  # scanner names tools after the registration key.
+  # CONFIRMED via reconciliation 2026-04-29 — Vercel AI SDK convention:
+  # tools are registered as `tools: { getInformation: tool({...}),
+  # addResource: tool({...}), understandQuery: tool({...}) }` in the
+  # streamText call inside app/api/chat/route.ts. The LLM scanner
+  # names tools after the registration key. Three tools, three
+  # different scopes — read (getInformation), write (addResource),
+  # query-decomposition (understandQuery) — give the demo richer
+  # attack surface than a two-tool target.
   tool_get_information:
     id: "Tool:getInformation"
     node_type: Tool
   tool_add_resource:
     id: "Tool:addResource"
+    node_type: Tool
+  tool_understand:
+    id: "Tool:understandQuery"
     node_type: Tool
 
   # PREDICTED — the system prompt is passed as `system: "..."` to
@@ -79,13 +87,13 @@ expected_nodes:
     id: "RAGIndex:embeddings"
     node_type: RAGIndex
 
-  # PREDICTED — chat history is persisted in a `messages` (or `chats`)
-  # table queried by chat_id, per the Vercel AI SDK template pattern.
-  # Verify against the schema; the LLM scanner names MemoryStore nodes
-  # after the table.
-  memory_store:
-    id: "MemoryStore:messages"
-    node_type: MemoryStore
+  # NOT APPLICABLE — verified 2026-04-29. N1's Drizzle schema has only
+  # `resources` and `embeddings` tables; chat history is managed client-
+  # side via the Vercel AI SDK `useChat` hook (React state), not in a
+  # server-side table. There is no MemoryStore for this target. The
+  # actual cross-call state-mutation surface is the embeddings RAGIndex,
+  # which addResource writes into — captured by the existing
+  # MEMORY_POISONABLE_BY: container → rag_index edge below.
 
 synthetic_nodes:
   prompt:
@@ -116,14 +124,9 @@ edges:
     target: model_router
     rationale: >
       The Next.js app calls the Vercel AI SDK `streamText` function in
-      app/api/chat/route.ts; the AI SDK routes through `Model:vercel-
-      ai:router` to the concrete provider model.
-  - type: INVOKES_MODEL
-    source: model_router
-    target: model_concrete
-    rationale: >
-      The `@ai-sdk/openai` provider resolves the router to the concrete
-      OpenAI model the chat route specifies.
+      app/api/chat/route.ts; the AI SDK's router model is what the
+      static scanner sees. The concrete provider model is configured at
+      runtime and not visible to the inventory pass.
   - type: USES_PROMPT
     source: model_router
     target: prompt
@@ -143,6 +146,14 @@ edges:
     rationale: >
       The model decides when to call addResource — writing new content
       into the RAGIndex. No human-approval gate.
+  - type: CALLS_TOOL
+    source: model_router
+    target: tool_understand
+    rationale: >
+      Same dispatcher routes calls to understandQuery — the model
+      decomposes user questions into sub-queries before retrieval. A
+      prompt-injection that hijacks understandQuery can steer
+      subsequent retrievals toward attacker-chosen content.
   - type: RETRIEVES_FROM
     source: model_router
     target: rag_index
@@ -188,15 +199,9 @@ edges:
       tool calls — are concatenated into the prompt context with no
       sanitization. A user can poison the index in turn N and exploit
       it in turn N+1. OWASP LLM01 / ASI-01 + ASI-06 (chained).
-  - type: PROMPT_INJECTABLE_INTO
-    source: memory_store
-    target: prompt
-    properties:
-      sanitized: false
-      trust_boundary_crossed: true
-    rationale: >
-      Chat history (messages table) is loaded into the model's context
-      for multi-turn coherence. Prior-turn injections persist.
+  # (No PROMPT_INJECTABLE_INTO from memory_store — N1 has no server-side
+  # chat history. Cross-call injection vectors all flow through the
+  # rag_index, captured above.)
   - type: TOOL_INVOKABLE_BY
     source: tool_get_information
     target: model_router
@@ -217,6 +222,18 @@ edges:
       This is the exfil-equivalent for poisoning: the model is the
       principal that gets to decide what enters the long-term
       knowledge base.
+  - type: TOOL_INVOKABLE_BY
+    source: tool_understand
+    target: model_router
+    properties:
+      requires_human_approval: false
+      scope: query_decompose
+    rationale: >
+      understandQuery is exposed without authorization — query
+      decomposition is the seam where prompt-injected content can
+      redirect the agent's retrieval pattern. Lower direct impact than
+      addResource but a critical lateral-move surface in the attack
+      chain.
   - type: MEMORY_POISONABLE_BY
     source: container
     target: rag_index
@@ -225,10 +242,6 @@ edges:
       user can drive the model to call addResource with adversarial
       content. This is the canonical agentic memory-poisoning shape
       and is the headline attack path the demo will visualize.
-  - type: MEMORY_POISONABLE_BY
-    source: container
-    target: memory_store
-    rationale: >
-      The chat history table is appended on every request without
-      isolation guarantees beyond chat_id. Adversarial messages persist
-      and influence future turns within the same chat.
+  # (No MEMORY_POISONABLE_BY → memory_store — see note above. The
+  # MEMORY_POISONABLE_BY: container → rag_index edge captures the
+  # actual cross-call state-mutation surface for this target.)

@@ -1,0 +1,739 @@
+{
+  "adapter_name": "anthropic",
+  "cache_key": {
+    "adapter": "anthropic",
+    "model_name": "claude-sonnet-4-5",
+    "prompt_sha": "a50748e66f251e3e05492dacc6463b4594d153b304e9de8da7d4cc3314744cbd",
+    "repo_commit_sha": "6fe41ac265b5c2aedb5c04d55144ddb882682b10",
+    "scanner_version": "0.1.4"
+  },
+  "enable_llm": true,
+  "model_name": "claude-sonnet-4-5",
+  "normalized_scan": {
+    "edge_count": 36,
+    "edges": [
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@ai-sdk/react",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@radix-ui/react-avatar",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@radix-ui/react-dropdown-menu",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@radix-ui/react-label",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@radix-ui/react-slot",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@t3-oss/env-nextjs",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@types/node",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@types/react",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:@types/react-dom",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:ai",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:class-variance-authority",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:clsx",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:dotenv",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:drizzle-kit",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:drizzle-orm",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:drizzle-zod",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:eslint",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:eslint-config-next",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:framer-motion",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:geist",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:lucide-react",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:nanoid",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:next",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:pg",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:postcss",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:postgres",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:react",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:react-dom",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:sonner",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:streamdown",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:tailwind-merge",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:tailwindcss",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:tailwindcss-animate",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:tsx",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:typescript",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:ai-sdk-preview-rag",
+        "source_type": "Repository",
+        "target_id": "Artifact:zod",
+        "target_type": "Artifact"
+      }
+    ],
+    "node_count": 44,
+    "nodes": [
+      {
+        "id": "Artifact:@ai-sdk/react",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@ai-sdk/react",
+          "version": "^2.0.76"
+        }
+      },
+      {
+        "id": "Artifact:@radix-ui/react-avatar",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@radix-ui/react-avatar",
+          "version": "^1.1.1"
+        }
+      },
+      {
+        "id": "Artifact:@radix-ui/react-dropdown-menu",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@radix-ui/react-dropdown-menu",
+          "version": "^2.1.2"
+        }
+      },
+      {
+        "id": "Artifact:@radix-ui/react-label",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@radix-ui/react-label",
+          "version": "^2.1.0"
+        }
+      },
+      {
+        "id": "Artifact:@radix-ui/react-slot",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@radix-ui/react-slot",
+          "version": "^1.1.0"
+        }
+      },
+      {
+        "id": "Artifact:@t3-oss/env-nextjs",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@t3-oss/env-nextjs",
+          "version": "^0.11.1"
+        }
+      },
+      {
+        "id": "Artifact:@types/node",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@types/node",
+          "version": "^22.10.2"
+        }
+      },
+      {
+        "id": "Artifact:@types/react",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@types/react",
+          "version": "^19.0.1"
+        }
+      },
+      {
+        "id": "Artifact:@types/react-dom",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "@types/react-dom",
+          "version": "^19.0.2"
+        }
+      },
+      {
+        "id": "Artifact:ai",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "ai",
+          "version": "^5.0.70"
+        }
+      },
+      {
+        "id": "Artifact:class-variance-authority",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "class-variance-authority",
+          "version": "^0.7.1"
+        }
+      },
+      {
+        "id": "Artifact:clsx",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "clsx",
+          "version": "^2.1.1"
+        }
+      },
+      {
+        "id": "Artifact:dotenv",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "dotenv",
+          "version": "^16.4.7"
+        }
+      },
+      {
+        "id": "Artifact:drizzle-kit",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "drizzle-kit",
+          "version": "^0.30.0"
+        }
+      },
+      {
+        "id": "Artifact:drizzle-orm",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "drizzle-orm",
+          "version": "^0.38.1"
+        }
+      },
+      {
+        "id": "Artifact:drizzle-zod",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "drizzle-zod",
+          "version": "^0.6.0"
+        }
+      },
+      {
+        "id": "Artifact:eslint",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "eslint",
+          "version": "^9.16.0"
+        }
+      },
+      {
+        "id": "Artifact:eslint-config-next",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "eslint-config-next",
+          "version": "15.5.7"
+        }
+      },
+      {
+        "id": "Artifact:framer-motion",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "framer-motion",
+          "version": "^11.14.1"
+        }
+      },
+      {
+        "id": "Artifact:geist",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "geist",
+          "version": "^1.3.1"
+        }
+      },
+      {
+        "id": "Artifact:lucide-react",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "lucide-react",
+          "version": "^0.468.0"
+        }
+      },
+      {
+        "id": "Artifact:nanoid",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "nanoid",
+          "version": "^5.0.9"
+        }
+      },
+      {
+        "id": "Artifact:next",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "next",
+          "version": "15.5.7"
+        }
+      },
+      {
+        "id": "Artifact:pg",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "pg",
+          "version": "^8.13.1"
+        }
+      },
+      {
+        "id": "Artifact:postcss",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "postcss",
+          "version": "^8.4.49"
+        }
+      },
+      {
+        "id": "Artifact:postgres",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "postgres",
+          "version": "^3.4.5"
+        }
+      },
+      {
+        "id": "Artifact:react",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "react",
+          "version": "^19.0.0"
+        }
+      },
+      {
+        "id": "Artifact:react-dom",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "react-dom",
+          "version": "^19.0.0"
+        }
+      },
+      {
+        "id": "Artifact:sonner",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "sonner",
+          "version": "^1.7.1"
+        }
+      },
+      {
+        "id": "Artifact:streamdown",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "streamdown",
+          "version": "^1.6.7"
+        }
+      },
+      {
+        "id": "Artifact:tailwind-merge",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "tailwind-merge",
+          "version": "^2.5.5"
+        }
+      },
+      {
+        "id": "Artifact:tailwindcss",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "tailwindcss",
+          "version": "^3.4.16"
+        }
+      },
+      {
+        "id": "Artifact:tailwindcss-animate",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "tailwindcss-animate",
+          "version": "^1.0.7"
+        }
+      },
+      {
+        "id": "Artifact:tsx",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "tsx",
+          "version": "^4.19.2"
+        }
+      },
+      {
+        "id": "Artifact:typescript",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "typescript",
+          "version": "^5.7.2"
+        }
+      },
+      {
+        "id": "Artifact:zod",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "name": "zod",
+          "version": "^4.1.12"
+        }
+      },
+      {
+        "id": "Container:ai-sdk-preview-rag",
+        "node_type": "Container",
+        "properties": {
+          "image": "ai-sdk-preview-rag:latest",
+          "image_digest": "",
+          "started_at": ""
+        }
+      },
+      {
+        "id": "Model:vercel-ai:router",
+        "node_type": "Model",
+        "properties": {
+          "hosted": true,
+          "name": "router",
+          "note": "Provider determined at runtime via @ai-sdk/* providers.",
+          "provider": "vercel-ai",
+          "version": "latest"
+        }
+      },
+      {
+        "id": "PromptTemplate:chat_system_prompt",
+        "node_type": "PromptTemplate",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "app/(preview)/api/chat/route.ts",
+          "_llm_grounding_file_sha256": "eb2ebbda9ecc84c91c60a221114689db8afda509343167955bcba37ccbf72a9a",
+          "_llm_grounding_line_end": 31,
+          "_llm_grounding_line_start": 18,
+          "name": "chat_system_prompt",
+          "role": "system"
+        }
+      },
+      {
+        "id": "RAGIndex:embeddings",
+        "node_type": "RAGIndex",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "lib/db/schema/embeddings.ts",
+          "_llm_grounding_file_sha256": "37322b240b363d94a2b064011e6c5b0de1fe5b6921b6aa724baebe5b638b80da",
+          "_llm_grounding_line_end": 21,
+          "_llm_grounding_line_start": 5,
+          "embedding_model": "openai/text-embedding-ada-002",
+          "name": "embeddings",
+          "provider": "pgvector"
+        }
+      },
+      {
+        "id": "Repository:ai-sdk-preview-rag",
+        "node_type": "Repository",
+        "properties": {
+          "default_branch": "main",
+          "url": "https://github.com/org/ai-sdk-preview-rag",
+          "visibility": "private"
+        }
+      },
+      {
+        "id": "Tool:addResource",
+        "node_type": "Tool",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "app/(preview)/api/chat/route.ts",
+          "_llm_grounding_file_sha256": "eb2ebbda9ecc84c91c60a221114689db8afda509343167955bcba37ccbf72a9a",
+          "_llm_grounding_line_end": 45,
+          "_llm_grounding_line_start": 36,
+          "description": "__VOLATILE__",
+          "name": "addResource",
+          "schema": "{\"type\":\"object\",\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"the content or resource to add to the knowledge base\"}},\"required\":[\"content\"],\"additionalProperties\":false,\"$schema\":\"http://json-schema.org/draft-07/schema#\"}"
+        }
+      },
+      {
+        "id": "Tool:getInformation",
+        "node_type": "Tool",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "app/(preview)/api/chat/route.ts",
+          "_llm_grounding_file_sha256": "eb2ebbda9ecc84c91c60a221114689db8afda509343167955bcba37ccbf72a9a",
+          "_llm_grounding_line_end": 63,
+          "_llm_grounding_line_start": 46,
+          "description": "__VOLATILE__",
+          "name": "getInformation",
+          "schema": "{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"the users question\"},\"similarQuestions\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"keywords to search\"}},\"required\":[\"question\",\"similarQuestions\"],\"additionalProperties\":false,\"$schema\":\"http://json-schema.org/draft-07/schema#\"}"
+        }
+      },
+      {
+        "id": "Tool:understandQuery",
+        "node_type": "Tool",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "app/(preview)/api/chat/route.ts",
+          "_llm_grounding_file_sha256": "eb2ebbda9ecc84c91c60a221114689db8afda509343167955bcba37ccbf72a9a",
+          "_llm_grounding_line_end": 90,
+          "_llm_grounding_line_start": 64,
+          "description": "__VOLATILE__",
+          "name": "understandQuery",
+          "schema": "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\",\"description\":\"the users query\"},\"toolsToCallInOrder\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"these are the tools you need to call in the order necessary to respond to the users query\"}},\"required\":[\"query\",\"toolsToCallInOrder\"],\"additionalProperties\":false,\"$schema\":\"http://json-schema.org/draft-07/schema#\"}"
+        }
+      }
+    ],
+    "stack": "node"
+  },
+  "prompts_dir": "prompts",
+  "repo_path": "/Users/mp/clouddev/asp-demo-targets/ai-sdk-preview-rag",
+  "schema_version": 1
+}
