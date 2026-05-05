@@ -1,0 +1,11 @@
+# Exfiltrated data from running the demo attack. Synthetic, but keeping
+# these files out of the repo anyway because they're noisy.
+exfil/
+
+# Local virtualenv
+.venv/
+
+# Caches
+__pycache__/
+.pytest_cache/
+*.pyc

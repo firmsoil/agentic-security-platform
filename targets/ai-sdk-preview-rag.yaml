@@ -1,0 +1,234 @@
+# Target profile for vercel-labs/ai-sdk-preview-rag.
+#
+# PRELIMINARY (authored 2026-04-28). Security-semantic edges and
+# rationales are filled in based on web verification of the target's
+# architecture; node IDs marked CONFIRMED were derived from
+# manifest/parser conventions, IDs marked PREDICTED need final
+# verification from a connector dry-scan against the cloned repo.
+#
+# To finalize this profile (week-3 procedure):
+#
+#   1. git clone https://github.com/vercel-labs/ai-sdk-preview-rag.git \
+#         ~/clouddev/asp-demo-targets/ai-sdk-preview-rag
+#
+#   2. Bind-mount in docker-compose.yml under asp-api.volumes:
+#        - ~/clouddev/asp-demo-targets/ai-sdk-preview-rag:/targets/ai-sdk-preview-rag:ro
+#
+#   3. Dry-scan to confirm IDs:
+#        podman compose exec asp-api \
+#          python3 -m connectors.github.src \
+#            --repo-path /targets/ai-sdk-preview-rag \
+#          | jq '.nodes[] | {node_type, id}'
+#
+#   4. Run the LLM scanner (week-3 dispatcher integration; until then
+#      the parity-test runner with --repo serves as a manual probe):
+#        ANTHROPIC_API_KEY=... python3 scripts/run_parity_test.py \
+#            --repo /targets/ai-sdk-preview-rag
+#      (note: parity diff against a Python static scanner won't apply
+#      here — the runner will print the LLM-extracted nodes and you
+#      reconcile them against the PREDICTED IDs below by hand.)
+#
+#   5. Reconcile each PREDICTED ID against the dry-scan / LLM output.
+
+name: ai-sdk-preview-rag
+repo_url: https://github.com/vercel-labs/ai-sdk-preview-rag
+
+expected_nodes:
+  # CONFIRMED — manifest pass uses the bind-mount directory name.
+  repo:
+    id: "Repository:ai-sdk-preview-rag"
+    node_type: Repository
+  container:
+    id: "Container:ai-sdk-preview-rag"
+    node_type: Container
+
+  # CONFIRMED — Node SDK→Model map matches `ai` (Vercel AI SDK) +
+  # `@ai-sdk/openai` in package.json. The Vercel AI SDK's `ai` package
+  # itself emits a `vercel-ai:router` Model node (provider determined
+  # at runtime); the provider package adds a concrete model.
+  model_router:
+    id: "Model:vercel-ai:router"
+    node_type: Model
+  model_concrete:
+    id: "Model:openai:gpt-4o"
+    node_type: Model
+
+  # PREDICTED — Vercel AI SDK convention: tools are registered as
+  # `tools: { getInformation: tool({...}), addResource: tool({...}) }`
+  # in the streamText call inside app/api/chat/route.ts. The LLM
+  # scanner names tools after the registration key.
+  tool_get_information:
+    id: "Tool:getInformation"
+    node_type: Tool
+  tool_add_resource:
+    id: "Tool:addResource"
+    node_type: Tool
+
+  # PREDICTED — the system prompt is passed as `system: "..."` to
+  # streamText. The LLM scanner names PromptTemplate nodes after the
+  # surrounding context; common naming is `chat_system_prompt` or
+  # `route_system_prompt` for an API route file.
+  prompt_template:
+    id: "PromptTemplate:chat_system_prompt"
+    node_type: PromptTemplate
+
+  # PREDICTED — the Drizzle schema declares an `embeddings` table with
+  # a vector column. The LLM scanner names RAGIndex nodes after the
+  # table.
+  rag_index:
+    id: "RAGIndex:embeddings"
+    node_type: RAGIndex
+
+  # PREDICTED — chat history is persisted in a `messages` (or `chats`)
+  # table queried by chat_id, per the Vercel AI SDK template pattern.
+  # Verify against the schema; the LLM scanner names MemoryStore nodes
+  # after the table.
+  memory_store:
+    id: "MemoryStore:messages"
+    node_type: MemoryStore
+
+synthetic_nodes:
+  prompt:
+    id: "Prompt:chat_system_prompt_runtime"
+    node_type: Prompt
+    properties:
+      name: chat_system_prompt
+      hash: seeded-vercel-ai-sdk
+      trace_id: seeded-demo-trace
+      timestamp: "2026-01-01T00:00:00Z"
+  classification:
+    id: "DataClassification:knowledge_base"
+    node_type: DataClassification
+    properties:
+      level: regulated
+      tags: [user_uploaded_content, embedded_documents]
+      name: knowledge_base
+
+# Security-semantic edges. This target is special: retrieval IS a tool
+# call (getInformation), and addResource WRITES new content into the
+# RAGIndex from inside the model's tool dispatcher. Two attack paths
+# materialize from one repo — that's why N1 was picked as the headline
+# Node demo.
+edges:
+  # ---- Structural / data-flow edges ----
+  - type: INVOKES_MODEL
+    source: container
+    target: model_router
+    rationale: >
+      The Next.js app calls the Vercel AI SDK `streamText` function in
+      app/api/chat/route.ts; the AI SDK routes through `Model:vercel-
+      ai:router` to the concrete provider model.
+  - type: INVOKES_MODEL
+    source: model_router
+    target: model_concrete
+    rationale: >
+      The `@ai-sdk/openai` provider resolves the router to the concrete
+      OpenAI model the chat route specifies.
+  - type: USES_PROMPT
+    source: model_router
+    target: prompt
+    rationale: >
+      The `system: "..."` parameter to streamText is the system prompt
+      assembled into every chat request.
+  - type: CALLS_TOOL
+    source: model_router
+    target: tool_get_information
+    rationale: >
+      The model decides when to call getInformation to retrieve from
+      the embedded knowledge base; the AI SDK's tool dispatcher invokes
+      it without authorization or rate limiting.
+  - type: CALLS_TOOL
+    source: model_router
+    target: tool_add_resource
+    rationale: >
+      The model decides when to call addResource — writing new content
+      into the RAGIndex. No human-approval gate.
+  - type: RETRIEVES_FROM
+    source: model_router
+    target: rag_index
+    rationale: >
+      getInformation queries the `embeddings` table by cosine distance;
+      the matching rows are concatenated into the response context.
+  - type: WRITES_TO
+    source: tool_add_resource
+    target: rag_index
+    rationale: >
+      addResource computes embeddings for new content and inserts into
+      the `embeddings` table. This is the load-bearing edge for the
+      memory-poisoning attack path: any prior conversation can write
+      adversarial content that future retrievals will pick up.
+  - type: READS
+    source: tool_get_information
+    target: rag_index
+    rationale: >
+      getInformation reads embeddings rows for retrieval; cited as a
+      READ here so the path-scoring engine can weight the read source
+      separately from the model's RETRIEVES_FROM edge.
+  - type: CLASSIFIED_AS
+    source: rag_index
+    target: classification
+    rationale: >
+      The embeddings table stores user-uploaded content from the chat
+      surface — content classified as user-controlled and high-impact
+      because it influences future retrievals.
+
+  # ---- Attack-potential edges (Red Agent's working set) ----
+  # This target is unusual: the prompt-injection source IS the
+  # RAGIndex AND the RAGIndex is ALSO a memory store from the agent's
+  # perspective (it accumulates conversational state via addResource).
+  # We model it as both for query coverage.
+  - type: PROMPT_INJECTABLE_INTO
+    source: rag_index
+    target: prompt
+    properties:
+      sanitized: false
+      trust_boundary_crossed: true
+    rationale: >
+      Embedded documents — including content added by prior addResource
+      tool calls — are concatenated into the prompt context with no
+      sanitization. A user can poison the index in turn N and exploit
+      it in turn N+1. OWASP LLM01 / ASI-01 + ASI-06 (chained).
+  - type: PROMPT_INJECTABLE_INTO
+    source: memory_store
+    target: prompt
+    properties:
+      sanitized: false
+      trust_boundary_crossed: true
+    rationale: >
+      Chat history (messages table) is loaded into the model's context
+      for multi-turn coherence. Prior-turn injections persist.
+  - type: TOOL_INVOKABLE_BY
+    source: tool_get_information
+    target: model_router
+    properties:
+      requires_human_approval: false
+      scope: knowledge_base_read
+    rationale: >
+      getInformation is exposed to every model call with no
+      authorization gate.
+  - type: TOOL_INVOKABLE_BY
+    source: tool_add_resource
+    target: model_router
+    properties:
+      requires_human_approval: false
+      scope: knowledge_base_write
+    rationale: >
+      addResource is *write-scoped* and exposed without human approval.
+      This is the exfil-equivalent for poisoning: the model is the
+      principal that gets to decide what enters the long-term
+      knowledge base.
+  - type: MEMORY_POISONABLE_BY
+    source: container
+    target: rag_index
+    rationale: >
+      The chat route exposes a tool that writes to the RAGIndex. Any
+      user can drive the model to call addResource with adversarial
+      content. This is the canonical agentic memory-poisoning shape
+      and is the headline attack path the demo will visualize.
+  - type: MEMORY_POISONABLE_BY
+    source: container
+    target: memory_store
+    rationale: >
+      The chat history table is appended on every request without
+      isolation guarantees beyond chat_id. Adversarial messages persist
+      and influence future turns within the same chat.

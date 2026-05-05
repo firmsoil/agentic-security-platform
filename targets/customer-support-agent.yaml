@@ -1,0 +1,193 @@
+# Target profile for langchain4j/langchain4j-examples customer-support-agent-example.
+#
+# PRELIMINARY (authored 2026-04-28). Security-semantic edges and
+# rationales are filled in based on web verification of the target's
+# architecture; node IDs marked CONFIRMED were derived from
+# manifest/parser conventions, IDs marked PREDICTED need final
+# verification from a connector dry-scan against the cloned repo.
+#
+# To finalize this profile (week-3 procedure):
+#
+#   1. git clone https://github.com/langchain4j/langchain4j-examples.git \
+#         ~/clouddev/asp-demo-targets/langchain4j-examples
+#      (the directory name does NOT need to match — the Java scanner
+#      uses the parent dir name of pom.xml, and we'll bind-mount the
+#      subdir directly so Repository:customer-support-agent-example matches)
+#
+#   2. Bind-mount in docker-compose.yml under asp-api.volumes:
+#        - ~/clouddev/asp-demo-targets/langchain4j-examples/customer-support-agent-example:/targets/customer-support-agent-example:ro
+#
+#   3. Dry-scan to confirm IDs:
+#        podman compose exec asp-api \
+#          python3 -m connectors.github.src \
+#            --repo-path /targets/customer-support-agent-example \
+#          | jq '.nodes[] | {node_type, id}'
+#
+#   4. Run the LLM scanner (separate from manifest scan in week 2):
+#        ANTHROPIC_API_KEY=... python3 -m connectors.github.src \
+#            --repo-path /targets/customer-support-agent-example \
+#            --enable-llm   # NOTE: dispatcher integration is a week-3
+#                           # follow-up task; until then, run scripts/
+#                           # run_parity_test.py with --repo to see the
+#                           # LLM-extracted nodes for this target.
+#
+#   5. Reconcile each PREDICTED ID below against the dry-scan / LLM
+#      output. If a predicted ID disagrees with what the connector
+#      produces, update this file rather than the connector.
+
+name: customer-support-agent
+repo_url: https://github.com/langchain4j/langchain4j-examples
+
+expected_nodes:
+  # CONFIRMED — manifest pass uses the bind-mount directory name.
+  repo:
+    id: "Repository:customer-support-agent-example"
+    node_type: Repository
+  container:
+    id: "Container:customer-support-agent-example"
+    node_type: Container
+
+  # CONFIRMED — Java SDK→Model map matches LangChain4j Spring Boot
+  # starter dependencies. The starter's transitive provider resolves
+  # to OpenAI by default; if the cloned repo uses a different starter
+  # (e.g. langchain4j-anthropic-spring-boot-starter), update this ID
+  # to match the SDK→Model map's output.
+  model:
+    id: "Model:openai:gpt-4o"
+    node_type: Model
+
+  # PREDICTED — LangChain4j @Tool annotation convention is
+  # Tool:<methodName>. Confirmed from web research:
+  # `BookingTools.getBookingDetails(bookingNumber, customerName, customerSurname)`.
+  tool:
+    id: "Tool:getBookingDetails"
+    node_type: Tool
+
+  # PREDICTED — the example uses LangChain4j's @SystemMessage on the
+  # @AiService interface. The extract_prompt_templates.md prompt names
+  # PromptTemplate nodes after the annotated method (e.g. `chat()`)
+  # rather than the file. Update after the LLM scanner runs to match
+  # the actual ID emitted.
+  prompt_template:
+    id: "PromptTemplate:chat_system_prompt"
+    node_type: PromptTemplate
+
+  # PREDICTED — LangChain4j typically uses a corpus directory under
+  # src/main/resources/ for terms-of-use docs. If this example doesn't
+  # ship one, fork it to add a single canonical injection document
+  # (per the demo target candidate doc's notes on J1).
+  rag_index:
+    id: "RAGIndex:terms-of-use"
+    node_type: RAGIndex
+
+  # PREDICTED — LangChain4j's MessageWindowChatMemory is the convention.
+  # The LLM scanner names MemoryStore nodes after the variable or bean
+  # name; common names are `chatMemory` or `messageWindowChatMemory`.
+  memory_store:
+    id: "MemoryStore:chatMemory"
+    node_type: MemoryStore
+
+synthetic_nodes:
+  prompt:
+    id: "Prompt:chat_system_prompt_runtime"
+    node_type: Prompt
+    properties:
+      name: chat_system_prompt
+      hash: seeded-langchain4j-example
+      trace_id: seeded-demo-trace
+      timestamp: "2026-01-01T00:00:00Z"
+  classification:
+    id: "DataClassification:regulated"
+    node_type: DataClassification
+    properties:
+      level: regulated
+      tags: [customer_records, booking_data]
+      name: regulated
+
+# Security-semantic edges. Each is a per-target judgment call about how
+# this target's components interact at runtime, encoded so the platform's
+# attack-path queries can traverse them.
+edges:
+  # ---- Structural / data-flow edges ----
+  - type: INVOKES_MODEL
+    source: container
+    target: model
+    rationale: >
+      The Spring Boot app calls the configured LLM provider via the
+      langchain4j-{provider}-spring-boot-starter; the @AiService
+      interface translates method calls into model invocations.
+  - type: USES_PROMPT
+    source: model
+    target: prompt
+    rationale: >
+      The @SystemMessage annotation on the @AiService interface is
+      assembled into the system prompt for each model invocation. We
+      materialize a Prompt node so attack paths can land on the prompt
+      surface explicitly.
+  - type: CALLS_TOOL
+    source: model
+    target: tool
+    rationale: >
+      LangChain4j's tool dispatcher invokes any @Tool-annotated method
+      the model emits — getBookingDetails returns booking + customer
+      data with no caller-context check.
+  - type: RETRIEVES_FROM
+    source: model
+    target: rag_index
+    rationale: >
+      RAG retrieval (terms of use, FAQ, refund policy) is concatenated
+      into the model's context via LangChain4j's content retriever.
+  - type: READS
+    source: tool
+    target: memory_store
+    rationale: >
+      getBookingDetails reads from the customer-support agent's chat
+      memory to disambiguate booking references in conversation context.
+  - type: CLASSIFIED_AS
+    source: memory_store
+    target: classification
+    rationale: >
+      Chat memory contains booking numbers, customer names, and
+      previously-asked questions — classified as regulated for
+      attack-path scoring.
+
+  # ---- Attack-potential edges (Red Agent's working set) ----
+  - type: PROMPT_INJECTABLE_INTO
+    source: rag_index
+    target: prompt
+    properties:
+      sanitized: false
+      trust_boundary_crossed: true
+    rationale: >
+      RAG-retrieved content is concatenated into the prompt without
+      sanitization. A poisoned terms-of-use document can hijack the
+      model. OWASP LLM01 / ASI-01.
+  - type: PROMPT_INJECTABLE_INTO
+    source: memory_store
+    target: prompt
+    properties:
+      sanitized: false
+      trust_boundary_crossed: true
+    rationale: >
+      MessageWindowChatMemory retains attacker-controlled chat history
+      across turns. A prior turn injected by the user persists into the
+      next turn's prompt assembly. OWASP ASI-06.
+  - type: TOOL_INVOKABLE_BY
+    source: tool
+    target: model
+    properties:
+      requires_human_approval: false
+      scope: customer_data_read
+    rationale: >
+      getBookingDetails has no authorization gate, no rate limit, no
+      human-approval step. The model decides when to call it — and what
+      booking number to pass. OWASP LLM06 / ASI-02.
+  - type: MEMORY_POISONABLE_BY
+    source: container
+    target: memory_store
+    rationale: >
+      Every /chat request appends to MessageWindowChatMemory keyed by
+      memory id; if the memory id is shared across users (the default
+      in many LangChain4j tutorial shapes), one user's input poisons
+      the next user's context. Verify principal_scoped from the LLM
+      scanner output before trusting this rationale.

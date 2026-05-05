@@ -1,0 +1,239 @@
+# Agentic Security Platform — Ontology v1 — Edge Types
+# ----------------------------------------------------
+# Edges encode the relationships from which risk emerges. The AI-specific
+# edges (PROMPT_INJECTABLE_INTO, TOOL_INVOKABLE_BY, MEMORY_POISONABLE_BY, ...)
+# are the differentiator vs. conventional CSPM.
+#
+# source_types and target_types list allowed node types. Empty = any.
+
+version: v1.0.0
+
+edges:
+  # -------------------------------------------------------------------------
+  # Structural
+  # -------------------------------------------------------------------------
+  - name: RUNS_IN
+    category: structural
+    description: A component runs inside another (Container RUNS_IN Namespace, Host RUNS_IN VPC, ...).
+    source_types: [Container, Host, ServiceAccount]
+    target_types: [Host, Namespace, Cluster, VPC, Subnet]
+
+  - name: DEPLOYED_TO
+    category: structural
+    description: An artifact is deployed to an environment.
+    source_types: [Artifact, Image]
+    target_types: [Container, Host, Cluster]
+
+  - name: DEPENDS_ON
+    category: structural
+    description: A component depends on another (runtime or build-time).
+    source_types: []
+    target_types: []
+
+  - name: OWNED_BY
+    category: structural
+    description: Ownership — used for routing findings to the right team.
+    source_types: []
+    target_types: [User, ServiceAccount]
+
+  - name: BUILT_FROM
+    category: structural
+    description: An image/artifact was built from a specific commit.
+    source_types: [Image, Artifact]
+    target_types: [Commit]
+
+  # -------------------------------------------------------------------------
+  # Identity
+  # -------------------------------------------------------------------------
+  - name: ASSUMES
+    category: identity
+    description: A principal can assume a role.
+    source_types: [User, ServiceAccount, IAMRole]
+    target_types: [IAMRole]
+
+  - name: HAS_PERMISSION
+    category: identity
+    description: A principal or role has a permission on a resource.
+    source_types: [User, ServiceAccount, IAMRole, ApiKey]
+    target_types: []
+    properties:
+      action: "string (e.g. s3:GetObject)"
+      effect: "enum: allow|deny"
+
+  - name: AUTHENTICATES_AS
+    category: identity
+    description: A runtime component authenticates as an identity.
+    source_types: [Container, Host]
+    target_types: [IAMRole, ServiceAccount, ApiKey]
+
+  - name: HOLDS_SECRET
+    category: identity
+    description: A principal or component holds a reference to a secret.
+    source_types: [IAMRole, ServiceAccount, Container, Host]
+    target_types: [Secret, ApiKey]
+
+  # -------------------------------------------------------------------------
+  # Data flow
+  # -------------------------------------------------------------------------
+  - name: READS
+    category: data_flow
+    description: Component reads from a data store.
+    source_types: []
+    target_types: [Database, Table, Column, Bucket, File, RAGIndex, VectorStore, MemoryStore]
+
+  - name: WRITES
+    category: data_flow
+    description: Component writes to a data store.
+    source_types: []
+    target_types: [Database, Table, Column, Bucket, File, RAGIndex, VectorStore, MemoryStore]
+
+  - name: PROCESSES
+    category: data_flow
+    description: Component processes data — broader than read/write; used for transformations.
+    source_types: []
+    target_types: []
+
+  - name: CONTAINS
+    category: data_flow
+    description: Structural containment (Table CONTAINS Column, Bucket CONTAINS File, ...).
+    source_types: [Database, Table, Bucket, RAGIndex, VectorStore]
+    target_types: [Table, Column, File]
+
+  - name: CLASSIFIED_AS
+    category: data_flow
+    description: Data element carries a sensitivity classification.
+    source_types: [Table, Column, Bucket, File, RAGIndex, MemoryStore]
+    target_types: [DataClassification]
+
+  # -------------------------------------------------------------------------
+  # AI  — the edges that make this an AI-security platform
+  # -------------------------------------------------------------------------
+  - name: INVOKES_MODEL
+    category: ai
+    description: A component invokes an LLM. Records the calling path.
+    source_types: [Container, Host, Workflow, Tool]
+    target_types: [Model]
+
+  - name: USES_PROMPT
+    category: ai
+    description: An invocation uses a specific prompt (or template).
+    source_types: [TraceSpan, Model]
+    target_types: [Prompt, PromptTemplate]
+
+  - name: CALLS_TOOL
+    category: ai
+    description: A model invocation calls a tool. Central to agentic tool-abuse analysis.
+    source_types: [Model, TraceSpan]
+    target_types: [Tool]
+
+  - name: RETRIEVES_FROM
+    category: ai
+    description: A model invocation retrieved context from a RAG source.
+    source_types: [TraceSpan, Model]
+    target_types: [RAGIndex, VectorStore, MemoryStore]
+
+  - name: PROTECTED_BY
+    category: ai
+    description: A model, prompt, or tool is protected by a guardrail.
+    source_types: [Model, Prompt, Tool, RAGIndex]
+    target_types: [Guardrail]
+
+  # --- Attack-potential edges (the Red Agent's working set) ---
+
+  - name: PROMPT_INJECTABLE_INTO
+    category: ai
+    description: >-
+      Untrusted input can reach a model's prompt. This is the root cause for
+      OWASP LLM01. Source is typically a data source (RAGIndex, ToolResponse,
+      user input channel); target is the Prompt or Model.
+    source_types: [RAGIndex, VectorStore, MemoryStore, Tool, File, Bucket]
+    target_types: [Prompt, Model]
+    properties:
+      sanitized: "bool"
+      trust_boundary_crossed: "bool"
+
+  - name: TOOL_INVOKABLE_BY
+    category: ai
+    description: >-
+      A tool is invokable by a model that lies on a prompt-injection-reachable
+      path. The heart of "excessive agency" (OWASP LLM06 / ASI-02) analysis.
+    source_types: [Tool]
+    target_types: [Model]
+    properties:
+      requires_human_approval: "bool"
+      scope: "string"
+
+  - name: MEMORY_POISONABLE_BY
+    category: ai
+    description: Untrusted input can modify a MemoryStore (OWASP Agentic ASI-06).
+    source_types: []
+    target_types: [MemoryStore]
+
+  - name: DATA_POISONABLE_BY
+    category: ai
+    description: Untrusted input can modify a TrainingDataset or RAGIndex (OWASP LLM04).
+    source_types: []
+    target_types: [TrainingDataset, RAGIndex, VectorStore]
+
+  - name: HALLUCINATION_IMPACTS
+    category: ai
+    description: >-
+      A hallucinated model output is consumed by a downstream action with real
+      impact (money movement, infra change, external message, ...). Used to
+      score the blast radius of overreliance (OWASP LLM09).
+    source_types: [Model]
+    target_types: []
+
+  # -------------------------------------------------------------------------
+  # Security
+  # -------------------------------------------------------------------------
+  - name: VULNERABLE_TO
+    category: security
+    description: A node is vulnerable to a known issue.
+    source_types: [Image, Artifact, Container, Host, Model, Tool]
+    target_types: [Vulnerability]
+
+  - name: HAS_FINDING
+    category: security
+    description: A node has a concrete finding attached.
+    source_types: []
+    target_types: [Finding]
+
+  - name: VIOLATES
+    category: security
+    description: A node violates a policy.
+    source_types: []
+    target_types: [Policy]
+
+  - name: MITIGATED_BY
+    category: security
+    description: A finding or attack path is mitigated by a specific control.
+    source_types: [Finding, AttackPath, Vulnerability]
+    target_types: [Control, Policy, Guardrail]
+
+  - name: EXPLOITS
+    category: security
+    description: An attack path chains together exploit steps.
+    source_types: [AttackPath]
+    target_types: [Vulnerability, Finding]
+
+  - name: CONTRIBUTES_TO
+    category: security
+    description: A finding or signal contributes to an incident.
+    source_types: [Finding, Alert, TraceSpan]
+    target_types: [Incident]
+
+  # -------------------------------------------------------------------------
+  # Events
+  # -------------------------------------------------------------------------
+  - name: OBSERVED_ON
+    category: security
+    description: A span was observed on a concrete runtime component.
+    source_types: [TraceSpan]
+    target_types: [Container, Host]
+
+  - name: CAUSED_BY
+    category: security
+    description: A causal relationship between spans, alerts, or audit entries.
+    source_types: [Alert, Incident]
+    target_types: [TraceSpan, AuditLogEntry]

@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.hypothesis/
+.tox/
+
+# uv
+.venv/
+.venv-*/
+
+# Node / frontend
+node_modules/
+.next/
+out/
+.turbo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Secrets — explicitly guard, even though SOPS handles this
+*.key
+*.pem
+!tests/**/*.pem
+*.sops.yaml.decrypted
+
+# Build artifacts
+*.log
+*.tmp
+
+# OSCAL / policy bundles (built artifacts, not source)
+compliance/**/build/
+policies/bundle/
+
+# Local docker state
+data/
+neo4j-data/
+site/

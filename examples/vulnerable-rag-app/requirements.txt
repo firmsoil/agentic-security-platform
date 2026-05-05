@@ -1,0 +1,8 @@
+# Vulnerable RAG app — minimal dependencies.
+# Pinned loosely; this is a demo artifact, not a library.
+
+fastapi>=0.115
+uvicorn[standard]>=0.32
+pydantic>=2.9
+anthropic>=0.40
+httpx>=0.27

@@ -1,0 +1,147 @@
+# Target profile for the bundled vulnerable-rag-app demo target.
+#
+# This file declares everything the seed script needs to wire security-
+# semantic edges around a scanned repository. To onboard a new target:
+#
+#   1. Clone the GitHub repo so its directory name matches `name` below.
+#   2. Run a connector dry-scan to see what node IDs the parsers produce:
+#        python3 -m connectors.github.src --repo-path <clone> | jq '.nodes'
+#   3. Copy this file, rename it `targets/<your-target>.yaml`, and edit
+#      every entry under `expected_nodes` to match the dry-scan output.
+#   4. Author the `edges` block — these are per-target judgment calls
+#      that encode security-semantic relationships, not statically
+#      derivable facts.
+#   5. Run the connector live, then run seed_graph.py with --target
+#      pointing at your new YAML.
+
+name: vulnerable-rag-app
+repo_url: https://github.com/org/vulnerable-rag-app
+
+# Nodes the GitHub connector is expected to have already produced when
+# the seed runs. The seed verifies each ID exists in Neo4j before writing
+# any edges; missing IDs abort with a clear "did you run the connector?"
+# error so it can't silently no-op (upsert_edge MATCHes both endpoints
+# and quietly drops the edge if either is missing).
+expected_nodes:
+  repo:
+    id: "Repository:vulnerable-rag-app"
+    node_type: Repository
+  container:
+    id: "Container:vulnerable-rag-app"
+    node_type: Container
+  model:
+    id: "Model:anthropic:claude-sonnet-4-5"
+    node_type: Model
+  tool:
+    id: "Tool:export_data"
+    node_type: Tool
+  rag_index:
+    id: "RAGIndex:corpus"
+    node_type: RAGIndex
+  memory_store:
+    id: "MemoryStore:_memory"
+    node_type: MemoryStore
+  prompt_template:
+    id: "PromptTemplate:system_prompt"
+    node_type: PromptTemplate
+
+# Nodes the seed creates because they aren't statically derivable from
+# the repo. The Prompt surface is the materialized runtime prompt that
+# attack-path queries traverse; the DataClassification is the regulated-
+# data sink that gives attack paths their score.
+synthetic_nodes:
+  prompt:
+    id: "Prompt:system_prompt_runtime"
+    node_type: Prompt
+    properties:
+      name: system_prompt
+      hash: seeded-system-prompt
+      trace_id: seeded-demo-trace
+      timestamp: "2026-01-01T00:00:00Z"
+  classification:
+    id: "DataClassification:regulated"
+    node_type: DataClassification
+    properties:
+      level: regulated
+      tags: [customer_records, internal_pricing]
+      name: regulated
+
+# All edges the seed writes. Source and target are aliases that resolve
+# against expected_nodes or synthetic_nodes. Every edge carries a
+# rationale so reviewers can audit *why* it exists without reading the
+# scanned repo's source.
+edges:
+  # ---- Structural / data-flow edges ----
+  - type: INVOKES_MODEL
+    source: container
+    target: model
+    rationale: >
+      The app container calls Claude via the anthropic SDK (model.py →
+      _real_anthropic_call).
+  - type: USES_PROMPT
+    source: model
+    target: prompt
+    rationale: >
+      Model invocation uses the system prompt. We materialize a Prompt
+      node so attack paths can land on the prompt surface explicitly.
+  - type: CALLS_TOOL
+    source: model
+    target: tool
+    rationale: >
+      model.py execute_tool_calls() blindly dispatches whatever the model
+      emits — vuln #3.
+  - type: RETRIEVES_FROM
+    source: model
+    target: rag_index
+    rationale: >
+      rag.retrieve() results are concatenated into the model's context in
+      app.py.
+  - type: READS
+    source: tool
+    target: memory_store
+    rationale: >
+      export_data calls memory.snapshot() — reads all session memory,
+      vuln #4.
+  - type: CLASSIFIED_AS
+    source: memory_store
+    target: classification
+    rationale: >
+      The demo memory store contains customer and pricing data, classified
+      as regulated for attack-path scoring.
+
+  # ---- Attack-potential edges (Red Agent's working set) ----
+  - type: PROMPT_INJECTABLE_INTO
+    source: rag_index
+    target: prompt
+    properties:
+      sanitized: false
+      trust_boundary_crossed: true
+    rationale: >
+      Corpus docs (including attacker-controlled injected-doc.md) are
+      concatenated into the prompt without sanitization — vuln #1. OWASP
+      LLM01 / ASI-01.
+  - type: PROMPT_INJECTABLE_INTO
+    source: memory_store
+    target: prompt
+    properties:
+      sanitized: false
+      trust_boundary_crossed: true
+    rationale: >
+      Session memory accumulates across requests with no isolation. A
+      poisoned memory entry can influence future model invocations —
+      vuln #5 / ASI-06.
+  - type: TOOL_INVOKABLE_BY
+    source: tool
+    target: model
+    properties:
+      requires_human_approval: false
+      scope: filesystem_write
+    rationale: >
+      export_data has no authorization, no rate limit, no guardrail. The
+      model decides what to export — vuln #3 + #4. OWASP LLM06 / ASI-02.
+  - type: MEMORY_POISONABLE_BY
+    source: container
+    target: memory_store
+    rationale: >
+      Any request to /chat appends to shared memory via remember() —
+      vuln #5. Cross-session poisoning is trivial.

@@ -1,0 +1,88 @@
+name: security-scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Re-scan daily to catch newly-published CVEs in unchanged code.
+    - cron: "17 6 * * *"
+
+permissions:
+  contents: read
+  security-events: write  # to upload SARIF to the Security tab
+
+jobs:
+  dependency-scan:
+    name: OSV-Scanner (deps)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OSV-Scanner
+        run: |
+          curl -L -o osv-scanner https://github.com/google/osv-scanner/releases/download/v1.9.1/osv-scanner_linux_amd64
+          chmod +x osv-scanner
+          sudo mv osv-scanner /usr/local/bin/
+
+      - name: Scan filesystem
+        run: osv-scanner scan source --format table --recursive .
+
+  filesystem-scan:
+    name: Grype (filesystem)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Scan repo
+        run: grype dir:. --fail-on high --only-fixed
+
+  container-scan:
+    name: Grype + Trivy (container)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build asp-api image
+        run: docker build -f packages/asp-api/Dockerfile -t asp-api:scan .
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: "asp-api:scan"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: true
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  gitleaks:
+    name: gitleaks (secrets)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

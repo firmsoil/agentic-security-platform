@@ -1,0 +1,116 @@
+# Workspace root — not a published package. Members live in packages/*.
+# See https://docs.astral.sh/uv/concepts/projects/workspaces/
+
+[project]
+name = "agentic-security-platform"
+version = "0.1.0"
+description = "Graph-native, telemetry-driven, agentic security platform for AI-native applications"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Agentic Security Platform Contributors" },
+]
+# The workspace root depends on its members so `uv sync` installs them all.
+dependencies = [
+    "asp-core",
+    "asp-adapters",
+    "asp-agents",
+    "asp-api",
+    "asp-cli",
+]
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+asp-core = { workspace = true }
+asp-adapters = { workspace = true }
+asp-agents = { workspace = true }
+asp-api = { workspace = true }
+asp-cli = { workspace = true }
+
+[dependency-groups]
+# Shared dev dependencies across the workspace.
+dev = [
+    "ruff>=0.6.0",
+    "mypy>=1.11",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "hypothesis>=6.112",
+    "testcontainers>=4.8",
+    "schemathesis>=3.36",
+    "pre-commit>=3.8",
+]
+
+# ------- Tooling configuration -------
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["frontend", "deploy", "compliance/components", "examples/notebooks"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "S",   # flake8-bandit (security!)
+    "ASYNC",
+    "RET",
+    "SIM",
+    "TCH",
+    "PL",
+    "RUF",
+]
+ignore = [
+    "PLR0913",  # too many arguments — common in FastAPI deps
+    "S101",     # assert — fine in tests (see per-file-ignores)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "PLR2004"]
+"**/conftest.py" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+warn_return_any = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers --strict-config"
+# Mirrors the "Unit tests across …" row in README.md: asp-core, asp-adapters,
+# asp-api, asp-cli, connectors, scripts. Plain `uv run pytest` discovers all
+# of them; CI enumerates the same set explicitly for clearer failures.
+testpaths = ["packages", "connectors", "scripts/tests"]
+# Connectors and scripts are not workspace-installed packages — they're
+# directories on disk that import via their dotted paths
+# (`connectors.github.src.scanner`, `scripts.seed_graph`). Add the project
+# root to sys.path so pytest collection can resolve those imports without
+# requiring callers to prepend `PYTHONPATH=.` on every invocation.
+pythonpath = ["."]
+asyncio_mode = "auto"
+markers = [
+    "integration: requires docker (neo4j, redpanda, etc.)",
+    "adversarial: part of the self-red-team suite",
+    "slow: takes >5 seconds",
+]
+
+[tool.coverage.run]
+source = ["packages"]
+branch = true
+omit = ["*/tests/*", "*/migrations/*"]
+
+[tool.coverage.report]
+skip_covered = false
+show_missing = true
+# Per §7.5 of the proposal: 80% on core, 60% overall.
+fail_under = 60

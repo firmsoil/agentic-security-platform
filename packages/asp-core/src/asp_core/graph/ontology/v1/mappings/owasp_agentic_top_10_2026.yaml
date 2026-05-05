@@ -1,0 +1,155 @@
+# OWASP Top 10 for Agentic Applications (2026) → Ontology mapping
+# ----------------------------------------------------------------
+# Source: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+# Released: December 2025
+#
+# Each ASI risk maps to one or more ontology elements. Some risks (e.g. ASI08
+# Cascading Failures) are inherently about graph structure — they're modeled
+# on the edge types that enable the propagation.
+
+framework: OWASP_AGENTIC_TOP_10_2026
+
+mappings:
+  # -----------------------------------------------------------------------
+  # ASI01 — Agent Goal Hijack
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: PROMPT_INJECTABLE_INTO }
+    identifier: ASI01
+    title: Agent Goal Hijack
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: node, name: Prompt }
+    identifier: ASI01
+    title: Agent Goal Hijack
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI02 — Tool Misuse & Exploitation
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: TOOL_INVOKABLE_BY }
+    identifier: ASI02
+    title: Tool Misuse and Exploitation
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: edge, name: CALLS_TOOL }
+    identifier: ASI02
+    title: Tool Misuse and Exploitation
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: node, name: Tool }
+    identifier: ASI02
+    title: Tool Misuse and Exploitation
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI03 — Identity & Privilege Abuse
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: HAS_PERMISSION }
+    identifier: ASI03
+    title: Identity and Privilege Abuse
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: edge, name: ASSUMES }
+    identifier: ASI03
+    title: Identity and Privilege Abuse
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: edge, name: AUTHENTICATES_AS }
+    identifier: ASI03
+    title: Identity and Privilege Abuse
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI04 — Agentic Supply Chain Vulnerabilities
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: node, name: Tool }
+    identifier: ASI04
+    title: Agentic Supply Chain Vulnerabilities
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: node, name: Model }
+    identifier: ASI04
+    title: Agentic Supply Chain Vulnerabilities
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: node, name: Image }
+    identifier: ASI04
+    title: Agentic Supply Chain Vulnerabilities
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI05 — Unexpected Code Execution
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: CALLS_TOOL }
+    identifier: ASI05
+    title: Unexpected Code Execution
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI06 — Memory & Context Poisoning
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: MEMORY_POISONABLE_BY }
+    identifier: ASI06
+    title: Memory and Context Poisoning
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: node, name: MemoryStore }
+    identifier: ASI06
+    title: Memory and Context Poisoning
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: edge, name: DATA_POISONABLE_BY }
+    identifier: ASI06
+    title: Memory and Context Poisoning
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI07 — Insecure Inter-Agent Communication
+  # -----------------------------------------------------------------------
+  # Modeled via INVOKES_MODEL / CALLS_TOOL between agent-backed components
+  # that should require authenticated/signed messages between agents. The
+  # concrete detection is in Rego, not in graph structure alone.
+  - applies_to: { kind: edge, name: INVOKES_MODEL }
+    identifier: ASI07
+    title: Insecure Inter-Agent Communication
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI08 — Cascading Failures
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: CONTRIBUTES_TO }
+    identifier: ASI08
+    title: Cascading Failures
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: edge, name: CAUSED_BY }
+    identifier: ASI08
+    title: Cascading Failures
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI09 — Human-Agent Trust Exploitation
+  # -----------------------------------------------------------------------
+  # Shows up as findings on Green-Agent auto-PR workflows and similar
+  # human-approval-requiring Tools. Modeled via the requires_human_approval
+  # property of TOOL_INVOKABLE_BY edges.
+  - applies_to: { kind: edge, name: TOOL_INVOKABLE_BY }
+    identifier: ASI09
+    title: Human-Agent Trust Exploitation
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  # -----------------------------------------------------------------------
+  # ASI10 — Rogue Agents
+  # -----------------------------------------------------------------------
+  # Detected behaviorally: an agent whose actions deviate from its declared
+  # scope. Grounded in the Model node carrying an expected scope and the
+  # INVOKES_MODEL / CALLS_TOOL edges it produces at runtime.
+  - applies_to: { kind: node, name: Model }
+    identifier: ASI10
+    title: Rogue Agents
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+
+  - applies_to: { kind: node, name: Evaluation }
+    identifier: ASI10
+    title: Rogue Agents
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/

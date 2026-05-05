@@ -1,0 +1,127 @@
+# OWASP Top 10 for LLM Applications (2025) → Ontology mapping
+# -----------------------------------------------------------
+# Source: https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/
+#
+# Each entry tags an ontology node or edge with the LLM Top 10 risk it is
+# most relevant to. At query time this lets us ask questions like:
+#   "show all findings that relate to OWASP LLM01"
+# by resolving through the mapping layer rather than hard-coding framework
+# knowledge into Cypher queries.
+
+framework: OWASP_LLM_TOP_10_2025
+
+mappings:
+  # -----------------------------------------------------------------------
+  # LLM01:2025 — Prompt Injection
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: PROMPT_INJECTABLE_INTO }
+    identifier: LLM01:2025
+    title: Prompt Injection
+    url: https://genai.owasp.org/llmrisk/llm01-prompt-injection/
+
+  - applies_to: { kind: node, name: Prompt }
+    identifier: LLM01:2025
+    title: Prompt Injection
+    url: https://genai.owasp.org/llmrisk/llm01-prompt-injection/
+
+  # -----------------------------------------------------------------------
+  # LLM02:2025 — Sensitive Information Disclosure
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: node, name: DataClassification }
+    identifier: LLM02:2025
+    title: Sensitive Information Disclosure
+    url: https://genai.owasp.org/llmrisk/llm02-sensitive-information-disclosure/
+
+  - applies_to: { kind: edge, name: READS }
+    identifier: LLM02:2025
+    title: Sensitive Information Disclosure
+    url: https://genai.owasp.org/llmrisk/llm02-sensitive-information-disclosure/
+
+  # -----------------------------------------------------------------------
+  # LLM03:2025 — Supply Chain
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: node, name: Model }
+    identifier: LLM03:2025
+    title: Supply Chain
+    url: https://genai.owasp.org/llmrisk/llm03-supply-chain/
+
+  - applies_to: { kind: node, name: Artifact }
+    identifier: LLM03:2025
+    title: Supply Chain
+    url: https://genai.owasp.org/llmrisk/llm03-supply-chain/
+
+  - applies_to: { kind: node, name: Image }
+    identifier: LLM03:2025
+    title: Supply Chain
+    url: https://genai.owasp.org/llmrisk/llm03-supply-chain/
+
+  # -----------------------------------------------------------------------
+  # LLM04:2025 — Data and Model Poisoning
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: DATA_POISONABLE_BY }
+    identifier: LLM04:2025
+    title: Data and Model Poisoning
+    url: https://genai.owasp.org/llmrisk/llm04-data-and-model-poisoning/
+
+  - applies_to: { kind: node, name: TrainingDataset }
+    identifier: LLM04:2025
+    title: Data and Model Poisoning
+    url: https://genai.owasp.org/llmrisk/llm04-data-and-model-poisoning/
+
+  # -----------------------------------------------------------------------
+  # LLM05:2025 — Improper Output Handling
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: HALLUCINATION_IMPACTS }
+    identifier: LLM05:2025
+    title: Improper Output Handling
+    url: https://genai.owasp.org/llmrisk/llm05-improper-output-handling/
+
+  # -----------------------------------------------------------------------
+  # LLM06:2025 — Excessive Agency
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: TOOL_INVOKABLE_BY }
+    identifier: LLM06:2025
+    title: Excessive Agency
+    url: https://genai.owasp.org/llmrisk/llm06-excessive-agency/
+
+  - applies_to: { kind: node, name: Tool }
+    identifier: LLM06:2025
+    title: Excessive Agency
+    url: https://genai.owasp.org/llmrisk/llm06-excessive-agency/
+
+  # -----------------------------------------------------------------------
+  # LLM07:2025 — System Prompt Leakage
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: node, name: PromptTemplate }
+    identifier: LLM07:2025
+    title: System Prompt Leakage
+    url: https://genai.owasp.org/llmrisk/llm07-system-prompt-leakage/
+
+  # -----------------------------------------------------------------------
+  # LLM08:2025 — Vector and Embedding Weaknesses
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: node, name: VectorStore }
+    identifier: LLM08:2025
+    title: Vector and Embedding Weaknesses
+    url: https://genai.owasp.org/llmrisk/llm08-vector-and-embedding-weaknesses/
+
+  - applies_to: { kind: node, name: RAGIndex }
+    identifier: LLM08:2025
+    title: Vector and Embedding Weaknesses
+    url: https://genai.owasp.org/llmrisk/llm08-vector-and-embedding-weaknesses/
+
+  # -----------------------------------------------------------------------
+  # LLM09:2025 — Misinformation
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: node, name: Model }
+    identifier: LLM09:2025
+    title: Misinformation
+    url: https://genai.owasp.org/llmrisk/llm09-misinformation/
+
+  # -----------------------------------------------------------------------
+  # LLM10:2025 — Unbounded Consumption
+  # -----------------------------------------------------------------------
+  - applies_to: { kind: edge, name: INVOKES_MODEL }
+    identifier: LLM10:2025
+    title: Unbounded Consumption
+    url: https://genai.owasp.org/llmrisk/llm10-unbounded-consumption/

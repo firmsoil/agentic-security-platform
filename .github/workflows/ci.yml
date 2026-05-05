@@ -1,0 +1,123 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-flight runs when a new commit arrives on the same branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least-privilege by default. Individual jobs grant more as needed.
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python lint + typecheck + test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.11"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --all-packages --dev
+
+      - name: Ruff lint
+        run: uv run ruff check packages/
+
+      - name: Ruff format check
+        run: uv run ruff format --check packages/
+
+      - name: Mypy typecheck
+        run: uv run mypy packages/asp-core/src packages/asp-api/src packages/asp-cli/src
+
+      - name: Pytest
+        # Keep this list aligned with the "Unit tests across …" row in the
+        # README capability matrix. If you add a new tested directory there,
+        # add it here too (and to [tool.pytest.ini_options].testpaths).
+        run: |
+          uv run pytest \
+            packages/asp-core/tests \
+            packages/asp-adapters/tests \
+            packages/asp-api/tests \
+            packages/asp-cli/tests \
+            connectors/github/tests \
+            scripts/tests \
+            --cov --cov-report=xml
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  policy:
+    name: OPA policy tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/v1.0.0/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+
+      - name: Validate policy bundle
+        run: opa check policies/
+
+      - name: Run policy tests
+        run: opa test policies/ -v
+
+  frontend:
+    name: Frontend typecheck + lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package.json
+
+      - name: Install deps
+        working-directory: frontend
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck
+        working-directory: frontend
+        run: npm run typecheck
+
+  # Pre-commit acts as a second line of defense — catches anything the
+  # individual jobs miss (trailing whitespace, JSON/YAML validity, gitleaks).
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pre-commit
+      - run: pre-commit run --all-files --show-diff-on-failure

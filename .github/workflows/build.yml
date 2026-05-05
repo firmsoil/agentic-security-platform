@@ -1,0 +1,104 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Required to sign images with Cosign keyless (OIDC-based).
+  id-token: write
+  # Required to push to GHCR.
+  packages: write
+  # Required to attach SBOMs/attestations to the release.
+  attestations: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/asp-api
+
+jobs:
+  build-and-sign:
+    name: Build, sign, attest (asp-api)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tags: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-,format=short
+
+      # Build multi-arch. Push only on main/tag/release — PRs do not publish.
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: packages/asp-api/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # SBOM and provenance are baked into the image attestation.
+          sbom: true
+          provenance: mode=max
+
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: "v2.4.1"
+
+      # Keyless signing via GitHub OIDC — no long-lived keys to manage.
+      # Verify later with:
+      #   cosign verify ghcr.io/ORG/REPO/asp-api@DIGEST \
+      #     --certificate-identity-regexp "https://github.com/ORG/REPO/.github/workflows/build.yml@.*" \
+      #     --certificate-oidc-issuer https://token.actions.githubusercontent.com
+      - name: Sign container image (keyless)
+        if: github.event_name != 'pull_request'
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          for tag in $TAGS; do
+            cosign sign --yes "${tag}@${DIGEST}"
+          done
+
+      - name: Generate build provenance attestation
+        if: github.event_name != 'pull_request'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true

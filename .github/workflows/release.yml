@@ -1,0 +1,209 @@
+name: release
+
+# Triggered by pushing a semver tag (e.g. v0.1.0). Produces:
+#   - A GitHub Release with auto-generated notes from conventional commits
+#   - Signed Python wheels for every workspace member
+#   - CycloneDX SBOMs attached to the release
+#   - SLSA provenance attestations on every release asset
+#
+# The container image is signed by `build.yml` (triggered by the same tag).
+# Release-note generation depends on conventional-commits discipline enforced
+# by pre-commit.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write       # to create the GitHub Release
+  id-token: write       # for Cosign keyless + attestations
+  attestations: write   # for SLSA provenance
+
+concurrency:
+  # Don't run two releases against the same tag.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-wheels:
+    name: Build + sign wheels
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      wheel-paths: ${{ steps.list.outputs.paths }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # for release-notes history
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.11"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Build all workspace wheels
+        run: |
+          mkdir -p dist
+          for pkg in packages/*/; do
+            name=$(basename "$pkg")
+            echo "=== building $name ==="
+            (cd "$pkg" && uv build --out-dir ../../dist)
+          done
+          ls -la dist/
+
+      - name: List wheel paths
+        id: list
+        run: |
+          {
+            echo "paths<<EOF"
+            ls dist/*.whl dist/*.tar.gz
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: "v2.4.1"
+
+      # Sign every wheel and sdist via Sigstore keyless.
+      # Verify later with:
+      #   cosign verify-blob --bundle <asset>.sigstore <asset>
+      - name: Sign release artifacts
+        run: |
+          set -euo pipefail
+          for f in dist/*.whl dist/*.tar.gz; do
+            cosign sign-blob --yes --bundle "${f}.sigstore" "$f"
+          done
+
+      - name: Attest build provenance for wheels
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/*.whl
+            dist/*.tar.gz
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/*.sigstore
+          retention-days: 90
+
+  sbom:
+    name: CycloneDX SBOMs for release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: build-wheels
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.11"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install runtime deps
+        run: uv sync --all-packages --no-dev
+
+      - name: Install cyclonedx-bom
+        run: uv pip install cyclonedx-bom
+
+      - name: Generate combined SBOM
+        run: uv run cyclonedx-py environment --output-format JSON --output-file sbom-release.cdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-sbom
+          path: sbom-release.cdx.json
+
+  publish-github-release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: [build-wheels, sbom]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloads
+
+      - name: Collect release assets
+        run: |
+          mkdir -p release-assets
+          cp downloads/release-artifacts/* release-assets/
+          cp downloads/release-sbom/* release-assets/
+          ls -la release-assets/
+
+      # Generate release notes from conventional commits since the previous
+      # tag. Falls back to "Initial release." for the first tag.
+      - name: Generate release notes
+        id: notes
+        run: |
+          prev=$(git describe --tags --abbrev=0 --exclude="${GITHUB_REF_NAME}" 2>/dev/null || echo "")
+          {
+            if [ -n "$prev" ]; then
+              echo "## Changes since ${prev}"
+              echo
+              git log --pretty=format:"- %s (%h)" "${prev}..${GITHUB_REF_NAME}" \
+                | grep -E "^- (feat|fix|perf|refactor|docs|chore)" \
+                | head -200
+            else
+              echo "## ${GITHUB_REF_NAME}"
+              echo
+              echo "Initial release."
+            fi
+            echo
+            echo "## Verifying this release"
+            echo
+            echo '### Container image'
+            echo
+            echo '```bash'
+            echo 'cosign verify \'
+            echo "  ghcr.io/${GITHUB_REPOSITORY}/asp-api:${GITHUB_REF_NAME#v} \\"
+            echo "  --certificate-identity-regexp 'https://github.com/${GITHUB_REPOSITORY}/.github/workflows/build.yml@.*' \\"
+            echo '  --certificate-oidc-issuer https://token.actions.githubusercontent.com'
+            echo '```'
+            echo
+            echo '### Wheels and sdists'
+            echo
+            echo '```bash'
+            echo 'cosign verify-blob \'
+            echo '  --bundle <asset>.sigstore \'
+            echo "  --certificate-identity-regexp 'https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yml@.*' \\"
+            echo '  --certificate-oidc-issuer https://token.actions.githubusercontent.com \'
+            echo '  <asset>'
+            echo '```'
+          } > release-notes.md
+          cat release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md
+          files: release-assets/*
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: false  # we built our own

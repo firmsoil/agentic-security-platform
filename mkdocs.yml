@@ -1,0 +1,78 @@
+site_name: Agentic Security Platform
+site_description: Graph-native, telemetry-driven, agentic security platform for AI-native applications
+site_url: https://agentic-security-platform.github.io/
+repo_url: https://github.com/agentic-security-platform/agentic-security-platform
+repo_name: agentic-security-platform/agentic-security-platform
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.share
+    - search.suggest
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+      # Fall back gracefully when built outside a git repo (e.g., release
+      # tarball, initial clone before `git init`).  CI always runs inside
+      # a real checkout so timestamps are accurate there.
+      fallback_to_build_date: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Concepts:
+      - concepts/index.md
+  - Architecture:
+      - architecture/index.md
+      - Threat model: architecture/threat-model.md
+  - Guides:
+      - guides/index.md
+  - Reference:
+      - reference/index.md
+  - ADRs:
+      - adr/README.md
+      - 0001 — Graph-first architecture: adr/0001-graph-first-architecture.md

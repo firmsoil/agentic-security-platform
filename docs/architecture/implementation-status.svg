@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1040" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <!--
+    Agentic Security Platform. Implementation Status Companion Diagram.
+    This is the operational sibling to the Agentic AI-Driven Security
+    SDLC vision diagram. The vision diagram (Agentic-AI-SDLC.png) shows
+    what the platform will be at v1.0. This diagram shows what ships
+    today vs. what is committed by phase.
+
+    Status legend:
+      Implemented (v0.1)   solid green border, light green fill
+      Phase 1 commitment   solid blue border, light blue fill
+      Phase 2 commitment   dashed blue border, very light blue fill
+      Phase 3+ roadmap     dashed grey border, white fill
+      Out of scope         red border, red strikethrough
+
+    Border style is the primary differentiator (solid vs dashed) so the
+    diagram remains readable in monochrome and to colour-blind viewers.
+  -->
+
+  <defs>
+    <style>
+      .impl       { fill: #ecfdf5; stroke: #059669; stroke-width: 2; }
+      .impl-text  { fill: #064e3b; }
+      .phase1     { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; }
+      .phase1-text{ fill: #1e3a8a; }
+      .phase2     { fill: #f5f9ff; stroke: #2563eb; stroke-width: 2; stroke-dasharray: 6 4; }
+      .phase2-text{ fill: #1e3a8a; }
+      .phase3     { fill: #ffffff; stroke: #6b7280; stroke-width: 2; stroke-dasharray: 4 4; }
+      .phase3-text{ fill: #374151; }
+      .oos        { fill: #fef2f2; stroke: #dc2626; stroke-width: 2; }
+      .oos-text   { fill: #7f1d1d; text-decoration: line-through; }
+
+      .stage-num    { fill: #fff; font-weight: 700; font-size: 16px; }
+      .stage-num-bg { fill: #1f3a8a; }
+      .component-text { font-size: 11px; }
+      .component-title { font-size: 11px; font-weight: 600; }
+      .small        { font-size: 10px; }
+      .micro        { font-size: 9px; }
+      .title        { font-size: 22px; font-weight: 700; fill: #0f172a; }
+      .subtitle     { font-size: 13px; fill: #475569; }
+      .layer-label  { font-size: 12px; font-weight: 700; fill: #1f2937; }
+      .badge        { font-size: 9px; font-weight: 700; }
+      .annotation   { font-size: 10px; font-style: italic; fill: #475569; }
+
+      .arrow-bold   { fill: none; stroke: #1f3a8a; stroke-width: 2; }
+      .tenant-boundary { fill: none; stroke: #059669; stroke-width: 2; stroke-dasharray: 8 4; }
+      .mcp-arrow    { fill: none; stroke: #7c3aed; stroke-width: 1.5; }
+    </style>
+
+    <marker id="arrowhead-bold" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f3a8a"/>
+    </marker>
+    <marker id="arrowhead-mcp" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <!-- HEADER -->
+  <rect x="0" y="0" width="1440" height="80" fill="#f8fafc"/>
+  <text x="40" y="36" class="title">Agentic Security Platform: Implementation Status</text>
+  <text x="40" y="58" class="subtitle">Companion to the SDLC vision diagram. Shows what is implemented in v0.2 vs. committed by phase. See README capability matrix for the canonical version.</text>
+  <text x="40" y="74" class="annotation">Generated from repo state at v0.2: 54 passing tests, 3 ADRs, ontology v1.0.0</text>
+
+  <g transform="translate(950, 12)">
+    <rect x="0" y="0" width="470" height="60" fill="#fff" stroke="#cbd5e1" stroke-width="1" rx="4"/>
+    <text x="10" y="14" class="component-title">Status legend</text>
+
+    <rect x="10" y="22" width="14" height="10" class="impl"/>
+    <text x="28" y="31" class="small impl-text">Implemented</text>
+
+    <rect x="118" y="22" width="14" height="10" class="phase1"/>
+    <text x="136" y="31" class="small phase1-text">Phase 1</text>
+
+    <rect x="208" y="22" width="14" height="10" class="phase2"/>
+    <text x="226" y="31" class="small phase2-text">Phase 2</text>
+
+    <rect x="306" y="22" width="14" height="10" class="phase3"/>
+    <text x="324" y="31" class="small phase3-text">Phase 3+</text>
+
+    <rect x="408" y="22" width="14" height="10" class="oos"/>
+    <text x="426" y="31" class="small oos-text">Out of scope</text>
+
+    <text x="10" y="50" class="micro" fill="#475569">Border style is the primary status indicator (solid vs dashed); colour reinforces but does not carry meaning alone.</text>
+  </g>
+
+  <!-- SIX STAGE HEADERS -->
+  <g transform="translate(40, 100)">
+    <g transform="translate(0,0)">
+      <rect x="0" y="0" width="220" height="36" fill="#1e3a8a" rx="4"/>
+      <circle cx="22" cy="18" r="12" class="stage-num-bg" stroke="#fff" stroke-width="1.5"/>
+      <text x="22" y="23" class="stage-num" text-anchor="middle">1</text>
+      <text x="42" y="16" class="stage-num">PLAN and DESIGN</text>
+      <text x="42" y="29" fill="#cbd5e1" font-size="10">AI Architecture and Inventory</text>
+    </g>
+    <g transform="translate(230,0)">
+      <rect x="0" y="0" width="220" height="36" fill="#1e3a8a" rx="4"/>
+      <circle cx="22" cy="18" r="12" class="stage-num-bg" stroke="#fff" stroke-width="1.5"/>
+      <text x="22" y="23" class="stage-num" text-anchor="middle">2</text>
+      <text x="42" y="16" class="stage-num">CODE and BUILD</text>
+      <text x="42" y="29" fill="#cbd5e1" font-size="10">AI-aware CI/CD Pipeline</text>
+    </g>
+    <g transform="translate(460,0)">
+      <rect x="0" y="0" width="220" height="36" fill="#1e3a8a" rx="4"/>
+      <circle cx="22" cy="18" r="12" class="stage-num-bg" stroke="#fff" stroke-width="1.5"/>
+      <text x="22" y="23" class="stage-num" text-anchor="middle">3</text>
+      <text x="42" y="16" class="stage-num">TEST and THREAT</text>
+      <text x="42" y="29" fill="#cbd5e1" font-size="10">Cross-Layer Risk and Paths</text>
+    </g>
+    <g transform="translate(690,0)">
+      <rect x="0" y="0" width="220" height="36" fill="#1e3a8a" rx="4"/>
+      <circle cx="22" cy="18" r="12" class="stage-num-bg" stroke="#fff" stroke-width="1.5"/>
+      <text x="22" y="23" class="stage-num" text-anchor="middle">4</text>
+      <text x="42" y="16" class="stage-num">DEPLOY</text>
+      <text x="42" y="29" fill="#cbd5e1" font-size="10">Policy Gates and Hardening</text>
+    </g>
+    <g transform="translate(920,0)">
+      <rect x="0" y="0" width="220" height="36" fill="#1e3a8a" rx="4"/>
+      <circle cx="22" cy="18" r="12" class="stage-num-bg" stroke="#fff" stroke-width="1.5"/>
+      <text x="22" y="23" class="stage-num" text-anchor="middle">5</text>
+      <text x="42" y="16" class="stage-num">RUN and MONITOR</text>
+      <text x="42" y="29" fill="#cbd5e1" font-size="10">Multi-layer Detection</text>
+    </g>
+    <g transform="translate(1150,0)">
+      <rect x="0" y="0" width="220" height="36" fill="#1e3a8a" rx="4"/>
+      <circle cx="22" cy="18" r="12" class="stage-num-bg" stroke="#fff" stroke-width="1.5"/>
+      <text x="22" y="23" class="stage-num" text-anchor="middle">6</text>
+      <text x="42" y="16" class="stage-num">RESPOND</text>
+      <text x="42" y="29" fill="#cbd5e1" font-size="10">Correlate, Learn, Improve</text>
+    </g>
+  </g>
+
+  <!-- STAGE 1 components -->
+  <g transform="translate(40, 148)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="220" height="56" class="phase1" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase1-text">AI Inventory Explainer</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase1-text">Visibility over the graph</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase1-text">Phase 1 (needs ingestion)</text>
+    </g>
+    <g transform="translate(0, 70)">
+      <rect x="0" y="0" width="220" height="56" class="phase1" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase1-text">Identity / Access Planning</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase1-text">JWT, RBAC, IAM nodes</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase1-text">Schema OK, ingestion Phase 1</text>
+    </g>
+    <g transform="translate(0, 140)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title impl-text">Data Classification Model</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text impl-text">DataClassification node type</text>
+      <text x="110" y="46" text-anchor="middle" class="micro impl-text">Implemented (ontology v1.0.0)</text>
+    </g>
+    <g transform="translate(0, 210)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title impl-text">AI Inventory Blueprint</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text impl-text">Model, Tool, RAG, Memory types</text>
+      <text x="110" y="46" text-anchor="middle" class="micro impl-text">Implemented (10 AI node types)</text>
+    </g>
+  </g>
+
+  <!-- STAGE 2 components -->
+  <g transform="translate(270, 148)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="220" height="56" class="phase1" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase1-text">Inputs: Code, IaC, Configs</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase1-text">GitHub + AWS connectors</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase1-text">Phase 1 (connector framework)</text>
+    </g>
+    <g transform="translate(0, 70)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">RED AGENT (Offense)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">on Shadow Graph (ephemeral)</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2, protocol implemented</text>
+    </g>
+    <g transform="translate(0, 140)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">GREEN AGENT (Build/Fix)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">Temporal workflow + HIL gate</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2, protocol implemented</text>
+    </g>
+    <g transform="translate(0, 210)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">BLUE AGENT (Review)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">policy alignment validator</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2, protocol implemented</text>
+    </g>
+    <g transform="translate(0, 280)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">Build Artifact + Graph Context</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">attached to commit, signed</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2 (Cosign in CI ready)</text>
+    </g>
+  </g>
+
+  <!-- STAGE 3 components -->
+  <g transform="translate(500, 148)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="220" height="56" class="phase1" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase1-text">Cross-Layer Risk Correlation</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase1-text">Cypher path queries</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase1-text">Phase 1 (ontology ready)</text>
+    </g>
+    <g transform="translate(0, 70)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">Attack Path Generation</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">Red Agent on Shadow Graph</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2</text>
+    </g>
+    <g transform="translate(0, 140)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title impl-text">OWASP / ATLAS Mapping</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text impl-text">LLM 2025 + Agentic 2026 + ATLAS</text>
+      <text x="110" y="46" text-anchor="middle" class="micro impl-text">Implemented, queryable via API</text>
+    </g>
+    <g transform="translate(0, 210)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">Risk Heat Map</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">Scoring algorithm</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2</text>
+    </g>
+    <g transform="translate(0, 280)">
+      <rect x="0" y="0" width="220" height="56" class="phase3" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase3-text">Integrations: TrojAI / PILLAR</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase3-text">Optional red-teaming partners</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase3-text">Phase 3+ (optional)</text>
+    </g>
+  </g>
+
+  <!-- STAGE 4 components -->
+  <g transform="translate(730, 148)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">CD Pipeline Gate</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">OPA Rego enforcement</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">OPA in dev OK, rules Phase 2</text>
+    </g>
+    <g transform="translate(0, 70)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">GREEN AGENT (Gatekeeper)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">routes, approves, blocks</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2</text>
+    </g>
+    <g transform="translate(0, 140)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title impl-text">OPA in dev stack</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text impl-text">container running, slot ready</text>
+      <text x="110" y="46" text-anchor="middle" class="micro impl-text">Implemented (docker-compose)</text>
+    </g>
+    <g transform="translate(0, 210)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">Hardened Deployment</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">policies + runtime monitors</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2</text>
+    </g>
+    <g transform="translate(0, 280)">
+      <rect x="0" y="0" width="220" height="56" class="phase1" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase1-text">Signed Images, SBOM, SLSA</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase1-text">SBOM in CI, Cosign Phase 1</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase1-text">SBOM OK, Cosign Phase 1, SLSA later</text>
+    </g>
+  </g>
+
+  <!-- STAGE 5 components -->
+  <g transform="translate(960, 148)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">Model Activity Detection</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">prompts, outputs, anomalies</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2</text>
+    </g>
+    <g transform="translate(0, 70)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">Workload Execution Detection</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">tool runs, code on hosts</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2</text>
+    </g>
+    <g transform="translate(0, 140)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">Cloud Layer Detection</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">identities, API calls, infra</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2</text>
+    </g>
+    <g transform="translate(0, 210)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title impl-text">OTel Collector (dev)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text impl-text">OTLP receivers, debug exporter</text>
+      <text x="110" y="46" text-anchor="middle" class="micro impl-text">Implemented (docker-compose)</text>
+    </g>
+    <g transform="translate(0, 280)">
+      <rect x="0" y="0" width="220" height="56" class="phase1" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase1-text">OTel to Redpanda to Workers</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase1-text">async, batched, tenant-scoped</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase1-text">Phase 1 (see callout below)</text>
+    </g>
+  </g>
+
+  <!-- STAGE 6 components -->
+  <g transform="translate(1190, 148)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">BLUE AGENT (Responder)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">correlate, contain via HIL</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2, protocol implemented</text>
+    </g>
+    <g transform="translate(0, 70)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">GREEN AGENT (Remediate)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">Temporal workflow, signed PRs</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2, protocol implemented</text>
+    </g>
+    <g transform="translate(0, 140)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase2-text">RED AGENT (Learn)</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase2-text">regression tests, threat updates</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase2-text">Phase 2, protocol implemented</text>
+    </g>
+    <g transform="translate(0, 210)">
+      <rect x="0" y="0" width="220" height="56" class="phase3" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase3-text">Shift-Left Learnings</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase3-text">feed back to Plan / Code / Test</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase3-text">Phase 3+</text>
+    </g>
+    <g transform="translate(0, 280)">
+      <rect x="0" y="0" width="220" height="56" class="phase3" rx="4"/>
+      <text x="110" y="16" text-anchor="middle" class="component-title phase3-text">Closed-Loop Improvement</text>
+      <text x="110" y="30" text-anchor="middle" class="component-text phase3-text">adversarial suite + metrics</text>
+      <text x="110" y="46" text-anchor="middle" class="micro phase3-text">Phase 3+</text>
+    </g>
+  </g>
+
+  <!-- TENANT BOUNDARY band with Security Graph centerpiece -->
+  <g transform="translate(40, 510)">
+    <rect x="0" y="0" width="1370" height="76" class="tenant-boundary" rx="6"/>
+    <text x="14" y="-2" class="badge" fill="#059669">TENANT BOUNDARY (per ADR-0003): X-Tenant-ID enforced at API and adapter</text>
+
+    <g transform="translate(525, 8)">
+      <rect x="0" y="0" width="320" height="60" class="impl" rx="6"/>
+      <text x="160" y="20" text-anchor="middle" class="component-title impl-text">SECURITY GRAPH</text>
+      <text x="160" y="36" text-anchor="middle" class="small impl-text">44 node types, 32 edge types, v1.0.0</text>
+      <text x="160" y="52" text-anchor="middle" class="micro impl-text">Implemented: ontology + Neo4j adapter (typed) + tenant-scoped writes</text>
+    </g>
+
+    <g transform="translate(20, 8)">
+      <rect x="0" y="0" width="200" height="60" class="phase1" rx="6"/>
+      <text x="100" y="20" text-anchor="middle" class="component-title phase1-text">Redpanda Event Bus</text>
+      <text x="100" y="36" text-anchor="middle" class="small phase1-text">async, batched UNWIND writes</text>
+      <text x="100" y="52" text-anchor="middle" class="micro phase1-text">Phase 1 (moved fwd from P3)</text>
+    </g>
+    <path d="M 220,38 L 525,38" class="arrow-bold" marker-end="url(#arrowhead-bold)"/>
+
+    <g transform="translate(870, 8)">
+      <rect x="0" y="0" width="200" height="60" class="phase2" rx="6"/>
+      <text x="100" y="20" text-anchor="middle" class="component-title phase2-text">MCP Server (3 tools)</text>
+      <text x="100" y="36" text-anchor="middle" class="small phase2-text">narrow consumer surface</text>
+      <text x="100" y="52" text-anchor="middle" class="micro phase2-text">attack_paths, policy, finding (Phase 2)</text>
+    </g>
+    <path d="M 845,38 L 870,38" class="mcp-arrow" marker-end="url(#arrowhead-mcp)"/>
+    <path d="M 1070,38 L 1130,38" class="mcp-arrow" marker-end="url(#arrowhead-mcp)"/>
+    <text x="1135" y="42" class="micro" fill="#7c3aed">to External agents (Claude Code, etc.)</text>
+
+    <g transform="translate(1130, 0)">
+      <text x="0" y="-2" class="badge" fill="#7c3aed">MCP both directions (ADR-0001 sec 5.4)</text>
+    </g>
+  </g>
+
+  <!-- FOUNDATIONAL AI-APPLICATION LAYERS -->
+  <g transform="translate(40, 612)">
+    <text x="0" y="-4" class="layer-label">Foundational AI-Application Layers (the graph data model, all ontology v1.0.0 implemented)</text>
+
+    <g transform="translate(0, 4)">
+      <rect x="0" y="0" width="220" height="34" class="impl" rx="4"/>
+      <text x="10" y="14" class="component-title impl-text">CODE and CONFIG</text>
+      <text x="10" y="28" class="micro impl-text">FastAPI, React, GitHub Actions, Docker</text>
+    </g>
+    <g transform="translate(230, 4)">
+      <rect x="0" y="0" width="220" height="34" class="impl" rx="4"/>
+      <text x="10" y="14" class="component-title impl-text">MODELS / AGENTS / TOOLS</text>
+      <text x="10" y="28" class="micro impl-text">10 AI node types, agent protocols implemented</text>
+    </g>
+    <g transform="translate(460, 4)">
+      <rect x="0" y="0" width="220" height="34" class="impl" rx="4"/>
+      <text x="10" y="14" class="component-title impl-text">DATA</text>
+      <text x="10" y="28" class="micro impl-text">PostgreSQL, Files, PII, Training data</text>
+    </g>
+    <g transform="translate(690, 4)">
+      <rect x="0" y="0" width="220" height="34" class="impl" rx="4"/>
+      <text x="10" y="14" class="component-title impl-text">WORKLOADS / INFRA</text>
+      <text x="10" y="28" class="micro impl-text">Containers, K8s, Hosts, Serverless</text>
+    </g>
+    <g transform="translate(920, 4)">
+      <rect x="0" y="0" width="220" height="34" class="impl" rx="4"/>
+      <text x="10" y="14" class="component-title impl-text">CLOUD and IDENTITY</text>
+      <text x="10" y="28" class="micro impl-text">IAM, VPC, Secrets, Service Accounts</text>
+    </g>
+    <g transform="translate(1150, 4)">
+      <rect x="0" y="0" width="220" height="34" class="impl" rx="4"/>
+      <text x="10" y="14" class="component-title impl-text">RAG / MEMORY / VECTOR</text>
+      <text x="10" y="28" class="micro impl-text">RAGIndex, VectorStore, MemoryStore</text>
+    </g>
+
+    <g transform="translate(0, 50)">
+      <rect x="0" y="0" width="1370" height="36" class="impl" rx="4"/>
+      <text x="14" y="14" class="component-title impl-text">AI-specific attack-surface edges (the differentiator)</text>
+      <text x="14" y="28" class="micro impl-text">Implemented: PROMPT_INJECTABLE_INTO, TOOL_INVOKABLE_BY, MEMORY_POISONABLE_BY, DATA_POISONABLE_BY, HALLUCINATION_IMPACTS, CALLS_TOOL, INVOKES_MODEL, USES_PROMPT, RETRIEVES_FROM, PROTECTED_BY</text>
+    </g>
+  </g>
+
+  <!-- COMPLIANCE / FRAMEWORK ROW -->
+  <g transform="translate(40, 750)">
+    <text x="0" y="-4" class="layer-label">Compliance and Frameworks</text>
+
+    <g transform="translate(0, 4)">
+      <rect x="0" y="0" width="450" height="56" class="impl" rx="4"/>
+      <text x="14" y="18" class="component-title impl-text">OWASP LLM Top 10 (2025), Agentic Top 10 (2026), MITRE ATLAS</text>
+      <text x="14" y="34" class="small impl-text">Mapped at the ontology layer, queryable</text>
+      <text x="14" y="48" class="micro impl-text">asp ontology mappings (framework=OWASP_AGENTIC_TOP_10_2026)</text>
+    </g>
+
+    <g transform="translate(460, 4)">
+      <rect x="0" y="0" width="450" height="56" class="phase3" rx="4"/>
+      <text x="14" y="18" class="component-title phase3-text">NIST CSF, ISO 27001, PCI DSS v4 (OSCAL component definitions)</text>
+      <text x="14" y="34" class="small phase3-text">Machine-readable controls + evidence collection</text>
+      <text x="14" y="48" class="micro phase3-text">Phase 3 (ADR-0002 reserved for Probabilistic Mitigation model)</text>
+    </g>
+
+    <g transform="translate(920, 4)">
+      <rect x="0" y="0" width="450" height="56" class="phase3" rx="4"/>
+      <text x="14" y="18" class="component-title phase3-text">G-SIB Profile: BCBS 239, DORA, SR 11-7, EBA ICT, FFIEC</text>
+      <text x="14" y="34" class="small phase3-text">Tailored profile for regulated banking</text>
+      <text x="14" y="48" class="micro phase3-text">Phase 3</text>
+    </g>
+  </g>
+
+  <!-- SELF-PROTECTION ROW -->
+  <g transform="translate(40, 830)">
+    <text x="0" y="-4" class="layer-label">Self-Protection and Governance (the platform's own posture)</text>
+
+    <g transform="translate(0, 4)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="14" y="18" class="component-title impl-text">Threat Model (v0.2)</text>
+      <text x="14" y="34" class="small impl-text">13 STRIDE entries inc. T-13</text>
+      <text x="14" y="48" class="micro impl-text">docs/architecture/threat-model.md</text>
+    </g>
+    <g transform="translate(230, 4)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="14" y="18" class="component-title impl-text">Cypher Injection Chokepoint</text>
+      <text x="14" y="34" class="small impl-text">_safe_label() + ontology allowlist</text>
+      <text x="14" y="48" class="micro impl-text">adapter, 8 tests</text>
+    </g>
+    <g transform="translate(460, 4)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="14" y="18" class="component-title impl-text">Tenant Scoping (ADR-0003)</text>
+      <text x="14" y="34" class="small impl-text">tenant_id required everywhere</text>
+      <text x="14" y="48" class="micro impl-text">adapter, middleware, routers, 21 tests</text>
+    </g>
+    <g transform="translate(690, 4)">
+      <rect x="0" y="0" width="220" height="56" class="impl" rx="4"/>
+      <text x="14" y="18" class="component-title impl-text">Supply Chain (CI)</text>
+      <text x="14" y="34" class="small impl-text">SBOM, OSV, Grype, Trivy, gitleaks</text>
+      <text x="14" y="48" class="micro impl-text">.github/workflows</text>
+    </g>
+    <g transform="translate(920, 4)">
+      <rect x="0" y="0" width="220" height="56" class="phase2" rx="4"/>
+      <text x="14" y="18" class="component-title phase2-text">Adversarial Self-Test Suite</text>
+      <text x="14" y="34" class="small phase2-text">platform red-teams itself nightly</text>
+      <text x="14" y="48" class="micro phase2-text">Phase 2 (scaffold ready)</text>
+    </g>
+    <g transform="translate(1150, 4)">
+      <rect x="0" y="0" width="220" height="56" class="oos" rx="4"/>
+      <text x="14" y="18" class="component-title oos-text">SaaS Multi-tenancy</text>
+      <text x="14" y="34" class="small oos-text">untrusted external tenants</text>
+      <text x="14" y="48" class="micro oos-text">Out of scope for v1.0 (ADR-0004)</text>
+    </g>
+  </g>
+
+  <!-- FOOTER -->
+  <g transform="translate(40, 920)">
+    <rect x="0" y="0" width="1370" height="40" fill="#1e3a8a" rx="4"/>
+    <text x="685" y="18" text-anchor="middle" fill="#fff" font-weight="700" font-size="13">CONTINUOUS FEEDBACK LOOP: LEARN to IMPROVE to SHIFT-LEFT to REPEAT</text>
+    <text x="685" y="32" text-anchor="middle" fill="#cbd5e1" font-size="10">Phase 3+ (the loop closes only after Phase 2 detection + Phase 3 metrics land)</text>
+  </g>
+
+  <g transform="translate(40, 980)">
+    <text x="0" y="14" class="annotation">
+      Read alongside: README capability matrix, ADR-0001 (graph-first), ADR-0003 (tenant scoping), ADR-0004 (SaaS out of scope), docs/architecture/threat-model.md
+    </text>
+    <text x="0" y="32" class="annotation">
+      The vision diagram (Agentic-AI-SDLC.png) shows what the platform will be at v1.0. This diagram shows what is shipping now and what is committed by phase.
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,53 @@
+# MITRE ATLAS → Ontology mapping
+# ------------------------------
+# ATLAS (Adversarial Threat Landscape for AI Systems) is MITRE's framework
+# for adversarial machine learning tactics. https://atlas.mitre.org/
+#
+# This is a *starter* mapping focused on the tactics most relevant to
+# deployed agentic systems. The full ATLAS matrix has >80 techniques;
+# we add them as the relevant edges/nodes mature.
+
+framework: MITRE_ATLAS
+
+mappings:
+  # AML.T0051 — LLM Prompt Injection
+  - applies_to: { kind: edge, name: PROMPT_INJECTABLE_INTO }
+    identifier: AML.T0051
+    title: LLM Prompt Injection
+    url: https://atlas.mitre.org/techniques/AML.T0051
+
+  # AML.T0053 — LLM Plugin Compromise
+  - applies_to: { kind: edge, name: TOOL_INVOKABLE_BY }
+    identifier: AML.T0053
+    title: LLM Plugin Compromise
+    url: https://atlas.mitre.org/techniques/AML.T0053
+
+  # AML.T0018 — Backdoor ML Model
+  - applies_to: { kind: node, name: Model }
+    identifier: AML.T0018
+    title: Backdoor ML Model
+    url: https://atlas.mitre.org/techniques/AML.T0018
+
+  # AML.T0020 — Poison Training Data
+  - applies_to: { kind: edge, name: DATA_POISONABLE_BY }
+    identifier: AML.T0020
+    title: Poison Training Data
+    url: https://atlas.mitre.org/techniques/AML.T0020
+
+  # AML.T0010 — ML Supply Chain Compromise
+  - applies_to: { kind: node, name: Artifact }
+    identifier: AML.T0010
+    title: ML Supply Chain Compromise
+    url: https://atlas.mitre.org/techniques/AML.T0010
+
+  # AML.T0057 — LLM Data Leakage
+  - applies_to: { kind: edge, name: READS }
+    identifier: AML.T0057
+    title: LLM Data Leakage
+    url: https://atlas.mitre.org/techniques/AML.T0057
+
+  # AML.T0056 — Extract LLM System Prompt
+  - applies_to: { kind: node, name: PromptTemplate }
+    identifier: AML.T0056
+    title: Extract LLM System Prompt
+    url: https://atlas.mitre.org/techniques/AML.T0056

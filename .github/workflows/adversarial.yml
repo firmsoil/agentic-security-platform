@@ -1,0 +1,135 @@
+name: adversarial
+
+# The platform red-teams itself. This workflow runs the adversarial suite
+# in tests/adversarial/ against a vulnerable-by-design target app, measures
+# coverage against the OWASP LLM Top 10 and OWASP Agentic Top 10, and
+# publishes the result as a CI artifact. Regressions block releases.
+#
+# v0.1 status: scaffold only. The full suite lands in Phase 2 (weeks 14–26).
+
+on:
+  schedule:
+    - cron: "23 4 * * *"  # daily, offset from other workflows
+  workflow_dispatch:
+  release:
+    types: [published]
+  # On PR, run only a fast smoke subset — see tests/adversarial/smoke/
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/asp-core/src/asp_core/graph/ontology/**"
+      - "packages/asp-agents/**"
+      - "packages/asp-adapters/src/asp_adapters/graph/**"
+      - "tests/adversarial/**"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Adversarial smoke (fast)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.11"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install deps
+        run: uv sync --all-packages --dev
+
+      # v0.1: the smoke subset does not yet exist.  When it does,
+      # it should run in under 5 minutes and cover one scenario per
+      # OWASP Top 10 category. Marker: `@pytest.mark.adversarial and not slow`
+      - name: Run smoke subset
+        run: |
+          if [ -d tests/adversarial/smoke ]; then
+            uv run pytest tests/adversarial/smoke -m "adversarial and not slow" -v
+          else
+            echo "::notice ::tests/adversarial/smoke not yet implemented; skipping"
+          fi
+
+  full:
+    name: Adversarial full suite
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    if: github.event_name != 'pull_request'
+
+    services:
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/testpassword
+          NEO4J_PLUGINS: '["apoc"]'
+          NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+        ports:
+          - 7687:7687
+          - 7474:7474
+        options: >-
+          --health-cmd "wget -qO- http://localhost:7474 > /dev/null || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.11"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install deps
+        run: uv sync --all-packages --dev
+
+      - name: Run full adversarial suite
+        env:
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: testpassword
+        run: |
+          if [ -d tests/adversarial ] && [ "$(find tests/adversarial -name 'test_*.py' | head -1)" ]; then
+            uv run pytest tests/adversarial -m adversarial \
+              --junitxml=adversarial-results.xml \
+              --tb=short -v
+          else
+            echo "::warning ::tests/adversarial not yet populated (expected until Phase 2)"
+            # Emit an empty junit doc so downstream steps don't error.
+            printf '%s\n' \
+              '<?xml version="1.0" encoding="UTF-8"?>' \
+              '<testsuites><testsuite name="adversarial" tests="0"/></testsuites>' \
+              > adversarial-results.xml
+          fi
+
+      - name: Compute OWASP coverage (placeholder until tests land)
+        run: |
+          mkdir -p coverage
+          # Authoritative scoreboard. Tests will populate this for real in Phase 2.
+          python3 - <<'PY' > coverage/owasp-coverage.json
+          import json
+          print(json.dumps({
+              "owasp_llm_top_10_2025":   {"covered": 0, "total": 10, "scenarios": []},
+              "owasp_agentic_top_10_2026": {"covered": 0, "total": 10, "scenarios": []},
+              "notes": "Phase 2 deliverable. See docs/architecture/threat-model.md T-12.",
+          }, indent=2))
+          PY
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adversarial-results
+          path: |
+            adversarial-results.xml
+            coverage/

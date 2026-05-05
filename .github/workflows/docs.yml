@@ -1,0 +1,82 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "packages/*/README.md"
+      - "README.md"
+  pull_request:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "packages/*/README.md"
+      - "README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: MkDocs build (strict)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # mkdocs-material's git-revision-date-localized plugin needs full history.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install MkDocs + plugins
+        run: |
+          pip install --upgrade pip
+          pip install \
+            mkdocs==1.6.1 \
+            mkdocs-material==9.5.44 \
+            mkdocs-git-revision-date-localized-plugin==1.2.9 \
+            pymdown-extensions==10.11.2
+
+      - name: Build docs (strict)
+        # --strict turns warnings (broken links, missing nav entries, unused
+        # files) into errors. This is the behavior we want — docs that compile
+        # cleanly are the only docs we ship.
+        run: mkdocs build --strict
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-24.04
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 5
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

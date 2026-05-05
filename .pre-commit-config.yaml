@@ -1,0 +1,56 @@
+# Pre-commit hooks — the first line of defense.
+# Install with: `pre-commit install`
+# Run against everything: `pre-commit run --all-files`
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=512"]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - pydantic>=2.9
+          - types-PyYAML
+        args: [--config-file=pyproject.toml]
+        # Only check packages/; ignore connectors until they stabilize.
+        files: ^packages/
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/open-policy-agent/conftest
+    rev: v0.56.0
+    hooks:
+      - id: conftest-test
+        files: ^policies/
+        args: [test, policies/]
+
+  # Conventional Commits — enforces consistent commit message format.
+  # Required for automated release notes.
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]

@@ -1,0 +1,375 @@
+# Agentic Security Platform — Ontology v1 — Node Types
+# ---------------------------------------------------
+# This file is the source of truth for what the Security Graph can contain.
+# Changes here are semver: additive = minor, breaking = major.
+#
+# Framework mappings live in `mappings/` and are merged at load time.
+# Keep `properties` minimal and documentational; actual property enforcement
+# belongs in the adapter layer near the database.
+
+version: v1.0.0
+
+nodes:
+  # -------------------------------------------------------------------------
+  # Infrastructure
+  # -------------------------------------------------------------------------
+  - name: CloudAccount
+    category: infrastructure
+    description: A cloud provider account (AWS account, Azure subscription, GCP project).
+    properties:
+      provider: "enum: aws|azure|gcp"
+      account_id: "string"
+      name: "string"
+
+  - name: VPC
+    category: infrastructure
+    description: A virtual private cloud / virtual network.
+    properties:
+      cidr: "string"
+      region: "string"
+
+  - name: Subnet
+    category: infrastructure
+    description: A network subnet within a VPC.
+    properties:
+      cidr: "string"
+      public: "bool"
+
+  - name: Host
+    category: infrastructure
+    description: A compute host — VM, bare metal, or logical node.
+    properties:
+      hostname: "string"
+      os: "string"
+      ip: "string"
+
+  - name: Container
+    category: infrastructure
+    description: A running container instance.
+    properties:
+      image: "string"
+      image_digest: "string (sha256)"
+      started_at: "datetime"
+
+  - name: Cluster
+    category: infrastructure
+    description: A Kubernetes or container-orchestration cluster.
+    properties:
+      platform: "enum: eks|aks|gke|openshift|other"
+      version: "string"
+
+  - name: Namespace
+    category: infrastructure
+    description: A Kubernetes namespace or equivalent logical grouping.
+    properties:
+      name: "string"
+
+  # -------------------------------------------------------------------------
+  # Identity
+  # -------------------------------------------------------------------------
+  - name: IAMRole
+    category: identity
+    description: A cloud IAM role — assumable identity with attached permissions.
+    properties:
+      arn: "string"
+      assume_role_policy: "json"
+
+  - name: ServiceAccount
+    category: identity
+    description: A Kubernetes service account or equivalent non-human identity.
+    properties:
+      name: "string"
+      namespace: "string"
+
+  - name: User
+    category: identity
+    description: A human identity.
+    properties:
+      email: "string"
+      external_id: "string"
+
+  - name: ApiKey
+    category: identity
+    description: An API key or token. The VALUE is never stored — only a reference.
+    properties:
+      reference: "string (e.g. vault://path/to/secret)"
+      created_at: "datetime"
+      last_used_at: "datetime"
+
+  - name: Secret
+    category: identity
+    description: A secret stored in a secrets manager. Again, reference only.
+    properties:
+      reference: "string"
+      manager: "enum: vault|openbao|aws_sm|azure_kv|gcp_sm"
+
+  # -------------------------------------------------------------------------
+  # Code
+  # -------------------------------------------------------------------------
+  - name: Repository
+    category: code
+    description: A source code repository.
+    properties:
+      url: "string"
+      default_branch: "string"
+      visibility: "enum: public|internal|private"
+
+  - name: Branch
+    category: code
+    description: A branch within a repository.
+    properties:
+      name: "string"
+      protected: "bool"
+
+  - name: Commit
+    category: code
+    description: A commit.
+    properties:
+      sha: "string"
+      author: "string"
+      signed: "bool"
+
+  - name: PullRequest
+    category: code
+    description: A pull request or merge request.
+    properties:
+      number: "int"
+      state: "enum: open|closed|merged"
+      author: "string"
+
+  - name: Workflow
+    category: code
+    description: A CI/CD workflow — GitHub Actions workflow, Harness pipeline, etc.
+    properties:
+      name: "string"
+      platform: "string"
+
+  - name: Artifact
+    category: code
+    description: A build artifact — a jar, wheel, image layer, etc.
+    properties:
+      name: "string"
+      version: "string"
+      digest: "string"
+
+  - name: Image
+    category: code
+    description: A container image.
+    properties:
+      registry: "string"
+      repository: "string"
+      tag: "string"
+      digest: "string (sha256)"
+      signed: "bool"
+
+  # -------------------------------------------------------------------------
+  # Data
+  # -------------------------------------------------------------------------
+  - name: Database
+    category: data
+    description: A database instance (RDS, Cosmos, CloudSQL, self-managed, ...).
+    properties:
+      engine: "string"
+      endpoint: "string"
+
+  - name: Table
+    category: data
+    description: A table within a database.
+    properties:
+      name: "string"
+
+  - name: Column
+    category: data
+    description: A column within a table. Modeled explicitly to support data-classification edges.
+    properties:
+      name: "string"
+      data_type: "string"
+
+  - name: Bucket
+    category: data
+    description: An object storage bucket (S3, GCS, Azure Blob container).
+    properties:
+      name: "string"
+      public: "bool"
+
+  - name: File
+    category: data
+    description: A file or object. Modeled explicitly when an individual file matters for classification.
+    properties:
+      path: "string"
+
+  - name: DataClassification
+    category: data
+    description: A data sensitivity classification label (PII, PHI, PCI, regulated, public, ...).
+    properties:
+      level: "enum: public|internal|confidential|restricted|regulated"
+      tags: "list[string] (e.g. pii, phi, pci)"
+
+  # -------------------------------------------------------------------------
+  # AI  — the node types that differentiate this platform
+  # -------------------------------------------------------------------------
+  - name: Model
+    category: ai
+    description: >-
+      An LLM or other AI model. Covers hosted APIs (Claude, GPT), self-hosted
+      (Llama, Mistral), and fine-tuned variants.
+    properties:
+      provider: "string"
+      name: "string"
+      version: "string"
+      hosted: "bool"
+
+  - name: Prompt
+    category: ai
+    description: >-
+      A prompt sent to a model at runtime. Typically ephemeral per-trace.
+      Stored for forensic correlation via trace_id.
+    properties:
+      trace_id: "string"
+      hash: "string (sha256 of normalized text)"
+      timestamp: "datetime"
+
+  - name: PromptTemplate
+    category: ai
+    description: A versioned prompt template. These are the stable artifacts; Prompts are instances.
+    properties:
+      name: "string"
+      version: "string"
+      checksum: "string"
+
+  - name: Guardrail
+    category: ai
+    description: >-
+      An input/output filter, policy, or validator. NeMo Guardrails,
+      Prompt Shields, content filters, structured-output validators, etc.
+    properties:
+      kind: "enum: input|output|bidirectional"
+      implementation: "string"
+
+  - name: Tool
+    category: ai
+    description: >-
+      A tool/function an agent can invoke. Includes MCP tools, LangChain tools,
+      native function-calling, and OpenAPI-described tools.
+    properties:
+      name: "string"
+      description: "string"
+      schema: "json (JSON Schema of inputs)"
+
+  - name: RAGIndex
+    category: ai
+    description: A retrieval-augmented-generation corpus / index.
+    properties:
+      name: "string"
+
+  - name: VectorStore
+    category: ai
+    description: A vector database (Pinecone, Weaviate, pgvector, ...).
+    properties:
+      engine: "string"
+      endpoint: "string"
+
+  - name: MemoryStore
+    category: ai
+    description: >-
+      Long-lived agent memory (conversation history, preference cache, etc.).
+      Distinct from a VectorStore because it holds per-principal state and is
+      a known poisoning target (OWASP Agentic ASI-06).
+    properties:
+      kind: "enum: conversation|episodic|semantic"
+      principal_scoped: "bool"
+
+  - name: TrainingDataset
+    category: ai
+    description: A dataset used for training or fine-tuning.
+    properties:
+      name: "string"
+      version: "string"
+      checksum: "string"
+
+  - name: Evaluation
+    category: ai
+    description: A model/agent evaluation run (eval set, red-team harness, benchmark).
+    properties:
+      name: "string"
+      timestamp: "datetime"
+      score: "float"
+
+  # -------------------------------------------------------------------------
+  # Security
+  # -------------------------------------------------------------------------
+  - name: Vulnerability
+    category: security
+    description: A known vulnerability — CVE, GHSA, or platform-specific ID.
+    properties:
+      identifier: "string (e.g. CVE-2024-12345)"
+      cvss: "float"
+      epss: "float"
+
+  - name: Finding
+    category: security
+    description: A concrete instance of a vulnerability or policy violation observed in the graph.
+    properties:
+      severity: "enum: critical|high|medium|low|info"
+      status: "enum: open|confirmed|false_positive|mitigated|closed"
+      first_seen: "datetime"
+
+  - name: Policy
+    category: security
+    description: A policy authored in Rego, versioned and signed.
+    properties:
+      name: "string"
+      version: "string"
+      signed: "bool"
+
+  - name: Control
+    category: security
+    description: A compliance control (NIST CSF, ISO 27001, PCI DSS, BCBS 239, DORA, ...).
+    properties:
+      framework: "string"
+      identifier: "string"
+
+  - name: Incident
+    category: security
+    description: A correlated security event representing suspected exploitation.
+    properties:
+      opened_at: "datetime"
+      severity: "enum: critical|high|medium|low"
+      status: "enum: open|investigating|contained|closed"
+
+  - name: AttackPath
+    category: security
+    description: A materialized attack path — a graph traversal that reaches a high-value asset.
+    properties:
+      score: "float"
+      length: "int"
+
+  # -------------------------------------------------------------------------
+  # Events
+  # -------------------------------------------------------------------------
+  - name: TraceSpan
+    category: event
+    description: An OpenTelemetry span. Links runtime behavior to graph nodes via trace_id.
+    properties:
+      trace_id: "string"
+      span_id: "string"
+      name: "string"
+      timestamp: "datetime"
+
+  - name: Alert
+    category: event
+    description: A raised alert — from the platform's Blue Agent or an external SIEM.
+    properties:
+      source: "string"
+      severity: "enum: critical|high|medium|low|info"
+
+  - name: AuditLogEntry
+    category: event
+    description: >-
+      A tamper-evident audit log entry. Chained (Merkle) for non-repudiation.
+      Every agent decision, every human approval, every policy change is one of these.
+    properties:
+      actor: "string"
+      action: "string"
+      prev_hash: "string"
+      hash: "string"

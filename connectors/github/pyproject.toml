@@ -1,0 +1,28 @@
+[project]
+name = "asp-connector-github"
+version = "0.1.0"
+description = "GitHub/repository connector for the Agentic Security Platform — scans repos and produces ontology-typed Security Graph nodes."
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "asp-core",
+    "asp-adapters",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# LLM scanner adapters. Both are optional so a user who only needs the
+# manifest scanner doesn't pay the dependency cost. Install one or both:
+#   pip install asp-connector-github[anthropic]
+#   pip install asp-connector-github[openai]
+#   pip install asp-connector-github[llm]   # both
+anthropic = ["anthropic>=0.40"]
+openai = ["openai>=1.50"]
+llm = ["anthropic>=0.40", "openai>=1.50"]
+
+[project.scripts]
+asp-github-scan = "connectors.github.src.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
