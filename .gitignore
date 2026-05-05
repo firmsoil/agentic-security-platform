@@ -63,3 +63,8 @@ policies/bundle/
 data/
 neo4j-data/
 site/
+
+# LLM scanner cache. Lives at <repo_path>/.cache/asp-llm-scan/<fingerprint>.json
+# inside every scanned repo. Ephemeral per-machine state (the cache key
+# already encodes determinism — the cache itself shouldn't be tracked).
+.cache/
