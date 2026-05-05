@@ -2,6 +2,10 @@
 
 > **Status: v0.1 — foundation plus live graph demo, with Option C MVP in flight for the launch.** Tenant scoping is enforced, the Cypher injection chokepoint is in place, the GitHub connector is now multi-stack (Python static today; Java + Node manifest pass landed in week 1), and the seeded demo graph powers live attack-path queries and a frontend graph explorer. The canonical prompt-injection path traverses an explicit `Prompt` node (`Source -> PROMPT_INJECTABLE_INTO -> Prompt <- USES_PROMPT - Model`) before reaching tool and data sinks. The launch was postponed 4–6 weeks from 2026-04-26 to ship an LLM-assisted source extractor for Java/Node ([ADR-0005](docs/adr/0005-llm-scanner-grounding-contract.md)) — grounded, verified, and reproducibly cached. The remaining Phase 1 ingestion work stays marked as planned until it has both passing tests and a working demo.
 
+## Agentic-AI-SDLC
+![Agentic-AI-SDLC](docs/architecture/Agentic-AI-SDLC.png)
+
+## Implementation status
 ![Implementation status diagram](docs/architecture/implementation-status.png)
 
 **An open-source, graph-native security platform for AI-native applications. Maps to OWASP LLM Top 10 (2025) and OWASP Agentic Top 10 (2026). Apache 2.0.**
