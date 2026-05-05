@@ -17,6 +17,6 @@ nodes that don't fit a pure-AST pass.
 # Scanner version is part of the cache key. Bump when the orchestration,
 # verification, or schema change in a way that invalidates prior results.
 # Bumping requires an ADR for material changes (see prompts/README.md).
-SCANNER_VERSION = "0.1.3"
+SCANNER_VERSION = "0.1.4"
 
 __all__ = ["SCANNER_VERSION"]

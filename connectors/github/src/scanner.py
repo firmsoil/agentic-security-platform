@@ -179,18 +179,27 @@ def _merge_nodes(
 
 
 def _strip_grounding(node: dict[str, Any]) -> dict[str, Any]:
-    """Move the top-level ``grounding`` block under ``properties._llm_grounding``.
+    """Flatten the top-level ``grounding`` block into ``properties._llm_grounding_*``
+    scalar fields.
 
     Keeps the audit trail visible to graph queries that opt into it
     (the underscore prefix marks it as out-of-normal-flow metadata)
     while removing it from the top-level shape that the writer iterates
     over for the ontology-typed graph write.
+
+    Neo4j only accepts primitive types and arrays of primitives as
+    property values — nested maps are rejected with TypeError. So
+    instead of storing the grounding dict whole, we flatten each field
+    into its own scalar property (``_llm_grounding_file_path``,
+    ``_llm_grounding_line_start``, etc.). Cypher can query these
+    naturally; the prefix keeps them out of normal node-property views.
     """
     out = deepcopy(node)
     grounding = out.pop("grounding", None)
     if grounding is not None:
         props = out.setdefault("properties", {})
-        props["_llm_grounding"] = grounding
+        for key, value in grounding.items():
+            props[f"_llm_grounding_{key}"] = value
     return out
 
 

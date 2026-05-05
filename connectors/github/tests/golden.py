@@ -105,20 +105,21 @@ def _normalize_properties(props: dict[str, Any]) -> dict[str, Any]:
             # deterministic; only LLM-narrated descriptions need
             # placeholdering).
             out[key] = _VOLATILE_PLACEHOLDER if value else ""
-        elif key == "_llm_grounding":
-            out[key] = _normalize_grounding(props[key])
+        elif key.startswith("_llm_grounding_"):
+            # Flattened grounding fields (Neo4j only accepts primitive
+            # property values, so the writer flattens the grounding
+            # block into individual scalar fields prefixed
+            # ``_llm_grounding_*``). Volatile model-narrated fields
+            # (``evidence``, ``confidence``) get placeholdered;
+            # structural fields (``file_path``, ``line_start``, etc.)
+            # are preserved.
+            suffix = key[len("_llm_grounding_"):]
+            if suffix in _VOLATILE_GROUNDING_FIELDS:
+                out[key] = _VOLATILE_PLACEHOLDER
+            else:
+                out[key] = props[key]
         else:
             out[key] = props[key]
-    return out
-
-
-def _normalize_grounding(g: dict[str, Any]) -> dict[str, Any]:
-    out: dict[str, Any] = {}
-    for key in sorted(g):
-        if key in _VOLATILE_GROUNDING_FIELDS:
-            out[key] = _VOLATILE_PLACEHOLDER
-        else:
-            out[key] = g[key]
     return out
 
 

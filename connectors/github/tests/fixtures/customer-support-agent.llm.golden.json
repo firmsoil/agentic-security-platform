@@ -1,0 +1,213 @@
+{
+  "adapter_name": "anthropic",
+  "cache_key": {
+    "adapter": "anthropic",
+    "model_name": "claude-sonnet-4-5",
+    "prompt_sha": "a50748e66f251e3e05492dacc6463b4594d153b304e9de8da7d4cc3314744cbd",
+    "repo_commit_sha": "16e5c4da7a6240f8c2fe684171204555a6369288b1de75bd827d87b0bd0aae3e",
+    "scanner_version": "0.1.4"
+  },
+  "enable_llm": true,
+  "model_name": "claude-sonnet-4-5",
+  "normalized_scan": {
+    "edge_count": 5,
+    "edges": [
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:customer-support-agent-example",
+        "source_type": "Repository",
+        "target_id": "Artifact:langchain4j-embeddings-all-minilm-l6-v2",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:customer-support-agent-example",
+        "source_type": "Repository",
+        "target_id": "Artifact:langchain4j-open-ai-spring-boot-starter",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:customer-support-agent-example",
+        "source_type": "Repository",
+        "target_id": "Artifact:langchain4j-spring-boot-starter",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:customer-support-agent-example",
+        "source_type": "Repository",
+        "target_id": "Artifact:spring-boot-starter-test",
+        "target_type": "Artifact"
+      },
+      {
+        "edge_type": "DEPENDS_ON",
+        "properties": {},
+        "source_id": "Repository:customer-support-agent-example",
+        "source_type": "Repository",
+        "target_id": "Artifact:spring-boot-starter-web",
+        "target_type": "Artifact"
+      }
+    ],
+    "node_count": 13,
+    "nodes": [
+      {
+        "id": "Artifact:langchain4j-embeddings-all-minilm-l6-v2",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "group": "dev.langchain4j",
+          "name": "langchain4j-embeddings-all-minilm-l6-v2",
+          "version": "1.14.0-beta24"
+        }
+      },
+      {
+        "id": "Artifact:langchain4j-open-ai-spring-boot-starter",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "group": "dev.langchain4j",
+          "name": "langchain4j-open-ai-spring-boot-starter",
+          "version": "1.14.0-beta24"
+        }
+      },
+      {
+        "id": "Artifact:langchain4j-spring-boot-starter",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "group": "dev.langchain4j",
+          "name": "langchain4j-spring-boot-starter",
+          "version": "1.14.0-beta24"
+        }
+      },
+      {
+        "id": "Artifact:spring-boot-starter-test",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "group": "org.springframework.boot",
+          "name": "spring-boot-starter-test",
+          "version": ""
+        }
+      },
+      {
+        "id": "Artifact:spring-boot-starter-web",
+        "node_type": "Artifact",
+        "properties": {
+          "digest": "",
+          "group": "org.springframework.boot",
+          "name": "spring-boot-starter-web",
+          "version": ""
+        }
+      },
+      {
+        "id": "Container:customer-support-agent-example",
+        "node_type": "Container",
+        "properties": {
+          "image": "customer-support-agent-example:latest",
+          "image_digest": "",
+          "started_at": ""
+        }
+      },
+      {
+        "id": "MemoryStore:chatMemoryProvider",
+        "node_type": "MemoryStore",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "src/main/java/dev/langchain4j/example/CustomerSupportAgentConfiguration.java",
+          "_llm_grounding_file_sha256": "aca1236b3f25cd364fb0052f941e73d3f16093f3793f481b0ad6db1cb906a346",
+          "_llm_grounding_line_end": 37,
+          "_llm_grounding_line_start": 33,
+          "backend": "inmemory",
+          "kind": "conversation",
+          "name": "chatMemoryProvider",
+          "principal_scoped": true
+        }
+      },
+      {
+        "id": "Model:openai:gpt-4o",
+        "node_type": "Model",
+        "properties": {
+          "hosted": true,
+          "name": "gpt-4o",
+          "provider": "openai",
+          "version": "latest"
+        }
+      },
+      {
+        "id": "PromptTemplate:customer_support_agent_system",
+        "node_type": "PromptTemplate",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "src/main/java/dev/langchain4j/example/CustomerSupportAgent.java",
+          "_llm_grounding_file_sha256": "bc9a7a9570ce6f3b3328414498bdafa95b317b37e6da4ad9b9c418c0b929d3cf",
+          "_llm_grounding_line_end": 30,
+          "_llm_grounding_line_start": 12,
+          "name": "customer_support_agent_system",
+          "role": "system"
+        }
+      },
+      {
+        "id": "RAGIndex:inmemory_terms_of_use",
+        "node_type": "RAGIndex",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "src/main/java/dev/langchain4j/example/CustomerSupportAgentConfiguration.java",
+          "_llm_grounding_file_sha256": "aca1236b3f25cd364fb0052f941e73d3f16093f3793f481b0ad6db1cb906a346",
+          "_llm_grounding_line_end": 61,
+          "_llm_grounding_line_start": 42,
+          "embedding_model": "AllMiniLmL6V2",
+          "name": "inmemory_terms_of_use",
+          "provider": "inmemory"
+        }
+      },
+      {
+        "id": "Repository:customer-support-agent-example",
+        "node_type": "Repository",
+        "properties": {
+          "default_branch": "main",
+          "url": "https://github.com/org/customer-support-agent-example",
+          "visibility": "private"
+        }
+      },
+      {
+        "id": "Tool:cancelBooking",
+        "node_type": "Tool",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "src/main/java/dev/langchain4j/example/BookingTools.java",
+          "_llm_grounding_file_sha256": "53adbfa4f18c417771513b0ae04f85a7ced48fd7f1eb97ab569f1929fd87d5e6",
+          "_llm_grounding_line_end": 25,
+          "_llm_grounding_line_start": 22,
+          "name": "cancelBooking"
+        }
+      },
+      {
+        "id": "Tool:getBookingDetails",
+        "node_type": "Tool",
+        "properties": {
+          "_llm_grounding_confidence": "__VOLATILE__",
+          "_llm_grounding_evidence": "__VOLATILE__",
+          "_llm_grounding_file_path": "src/main/java/dev/langchain4j/example/BookingTools.java",
+          "_llm_grounding_file_sha256": "53adbfa4f18c417771513b0ae04f85a7ced48fd7f1eb97ab569f1929fd87d5e6",
+          "_llm_grounding_line_end": 20,
+          "_llm_grounding_line_start": 17,
+          "name": "getBookingDetails"
+        }
+      }
+    ],
+    "stack": "java"
+  },
+  "prompts_dir": "prompts",
+  "repo_path": "/Users/mp/clouddev/asp-demo-targets/langchain4j-examples/customer-support-agent-example",
+  "schema_version": 1
+}

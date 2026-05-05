@@ -81,27 +81,27 @@ class TestNormalizeScanResult:
         assert b["properties"]["description"] == "__VOLATILE__"
 
     def test_grounding_volatile_fields_placeholdered(self):
+        # Grounding is flattened into _llm_grounding_<field> scalar
+        # properties (Neo4j compatibility — see scanner._strip_grounding).
         scan = _scan(_node(
             "Tool", "x",
-            _llm_grounding={
-                "file_path": "src/tools.py",
-                "file_sha256": "0" * 64,
-                "line_start": 1,
-                "line_end": 5,
-                "evidence": "function defines the tool",
-                "confidence": "high",
-            },
+            _llm_grounding_file_path="src/tools.py",
+            _llm_grounding_file_sha256="0" * 64,
+            _llm_grounding_line_start=1,
+            _llm_grounding_line_end=5,
+            _llm_grounding_evidence="function defines the tool",
+            _llm_grounding_confidence="high",
         ))
         norm = normalize_scan_result(scan)
-        g = norm["nodes"][0]["properties"]["_llm_grounding"]
-        # Structural fields preserved.
-        assert g["file_path"] == "src/tools.py"
-        assert g["file_sha256"] == "0" * 64
-        assert g["line_start"] == 1
-        assert g["line_end"] == 5
+        props = norm["nodes"][0]["properties"]
+        # Structural fields preserved verbatim.
+        assert props["_llm_grounding_file_path"] == "src/tools.py"
+        assert props["_llm_grounding_file_sha256"] == "0" * 64
+        assert props["_llm_grounding_line_start"] == 1
+        assert props["_llm_grounding_line_end"] == 5
         # Model-narrated fields placeholdered.
-        assert g["evidence"] == "__VOLATILE__"
-        assert g["confidence"] == "__VOLATILE__"
+        assert props["_llm_grounding_evidence"] == "__VOLATILE__"
+        assert props["_llm_grounding_confidence"] == "__VOLATILE__"
 
     def test_normalized_output_is_idempotent(self):
         scan = _scan(_node("Tool", "z"), _node("Tool", "a"))

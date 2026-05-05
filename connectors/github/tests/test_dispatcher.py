@@ -257,12 +257,17 @@ async def test_scan_with_llm_merges_manifest_and_llm_nodes(
     # LLM-extracted node also present.
     assert "Tool:exportData" in ids
 
-    # Grounding moved under properties._llm_grounding, not at top level.
+    # Grounding flattened into properties._llm_grounding_* scalar fields.
+    # Nested-map storage was rejected by Neo4j (only primitives + arrays of
+    # primitives are valid property values), so we flatten each grounding
+    # field into its own scalar property.
     tool_node = next(n for n in result.nodes if n["id"] == "Tool:exportData")
     assert "grounding" not in tool_node
-    assert "_llm_grounding" in tool_node["properties"]
-    assert tool_node["properties"]["_llm_grounding"]["file_path"] == "src/tools.ts"
-    assert tool_node["properties"]["_llm_grounding"]["file_sha256"] == sha
+    assert "_llm_grounding" not in tool_node["properties"]
+    assert tool_node["properties"]["_llm_grounding_file_path"] == "src/tools.ts"
+    assert tool_node["properties"]["_llm_grounding_file_sha256"] == sha
+    assert tool_node["properties"]["_llm_grounding_line_start"] == 1
+    assert tool_node["properties"]["_llm_grounding_confidence"] == "high"
 
 
 @pytest.mark.asyncio
@@ -331,16 +336,22 @@ def test_merge_logic_drops_llm_collisions_and_strips_grounding():
     assert "Tool:export_data" in dropped
     tool = next(n for n in merged if n["id"] == "Tool:export_data")
     assert tool == manifest[1]  # untouched
-    assert "_llm_grounding" not in tool.get("properties", {})
+    assert not any(
+        k.startswith("_llm_grounding") for k in tool.get("properties", {})
+    )
 
-    # Unique LLM node kept, grounding relocated.
+    # Unique LLM node kept, grounding flattened into scalar properties.
     pt = next(n for n in merged if n["id"] == "PromptTemplate:system")
     assert "grounding" not in pt
-    assert pt["properties"]["_llm_grounding"]["file_path"] == "model.py"
+    assert pt["properties"]["_llm_grounding_file_path"] == "model.py"
+    assert pt["properties"]["_llm_grounding_line_start"] == 5
+    assert pt["properties"]["_llm_grounding_confidence"] == "high"
 
     # Original manifest list not mutated.
     assert len(manifest) == 2
-    assert "_llm_grounding" not in manifest[1].get("properties", {})
+    assert not any(
+        k.startswith("_llm_grounding") for k in manifest[1].get("properties", {})
+    )
 
 
 @pytest.mark.asyncio

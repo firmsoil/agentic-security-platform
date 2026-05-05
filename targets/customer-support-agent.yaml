@@ -56,11 +56,16 @@ expected_nodes:
     id: "Model:openai:gpt-4o"
     node_type: Model
 
-  # PREDICTED — LangChain4j @Tool annotation convention is
-  # Tool:<methodName>. Confirmed from web research:
-  # `BookingTools.getBookingDetails(bookingNumber, customerName, customerSurname)`.
+  # CONFIRMED via reconciliation 2026-04-29 — LangChain4j @Tool
+  # annotation convention. The example exposes two @Tool methods on
+  # BookingTools: getBookingDetails (read) and cancelBooking (destructive).
+  # Modeling both gives the demo's attack-path narrative two surfaces —
+  # exfil through getBookingDetails, state-mutation through cancelBooking.
   tool:
     id: "Tool:getBookingDetails"
+    node_type: Tool
+  tool_cancel:
+    id: "Tool:cancelBooking"
     node_type: Tool
 
   # PREDICTED — the example uses LangChain4j's @SystemMessage on the
@@ -69,7 +74,7 @@ expected_nodes:
   # rather than the file. Update after the LLM scanner runs to match
   # the actual ID emitted.
   prompt_template:
-    id: "PromptTemplate:chat_system_prompt"
+    id: "PromptTemplate:customer_support_agent_system"
     node_type: PromptTemplate
 
   # PREDICTED — LangChain4j typically uses a corpus directory under
@@ -77,14 +82,14 @@ expected_nodes:
   # ship one, fork it to add a single canonical injection document
   # (per the demo target candidate doc's notes on J1).
   rag_index:
-    id: "RAGIndex:terms-of-use"
+    id: "RAGIndex:inmemory_terms_of_use"
     node_type: RAGIndex
 
   # PREDICTED — LangChain4j's MessageWindowChatMemory is the convention.
   # The LLM scanner names MemoryStore nodes after the variable or bean
   # name; common names are `chatMemory` or `messageWindowChatMemory`.
   memory_store:
-    id: "MemoryStore:chatMemory"
+    id: "MemoryStore:chatMemoryProvider"
     node_type: MemoryStore
 
 synthetic_nodes:
@@ -131,6 +136,13 @@ edges:
       LangChain4j's tool dispatcher invokes any @Tool-annotated method
       the model emits — getBookingDetails returns booking + customer
       data with no caller-context check.
+  - type: CALLS_TOOL
+    source: model
+    target: tool_cancel
+    rationale: >
+      Same dispatcher, different tool — cancelBooking is a state-
+      mutation operation. The model decides when to call it and on
+      what booking number; no human-approval gate.
   - type: RETRIEVES_FROM
     source: model
     target: rag_index
@@ -182,6 +194,18 @@ edges:
       getBookingDetails has no authorization gate, no rate limit, no
       human-approval step. The model decides when to call it — and what
       booking number to pass. OWASP LLM06 / ASI-02.
+  - type: TOOL_INVOKABLE_BY
+    source: tool_cancel
+    target: model
+    properties:
+      requires_human_approval: false
+      scope: customer_record_modify
+    rationale: >
+      cancelBooking has the same no-auth, no-approval surface as
+      getBookingDetails — but cancellation is destructive. Flips a
+      booking record state without confirmation. Same OWASP categories
+      (LLM06 / ASI-02), with substantially higher impact than the
+      read-only lookup.
   - type: MEMORY_POISONABLE_BY
     source: container
     target: memory_store
