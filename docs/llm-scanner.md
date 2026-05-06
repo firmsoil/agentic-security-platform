@@ -176,7 +176,7 @@ Three places to look when reviewing a scan you didn't run yourself:
   range, and SHA — re-open the file at the cited range and read it
   yourself.
 
-## Calibration history (week-2 launch readiness)
+## Calibration history
 
 Per ADR-0005, the launch trust posture rests on running the scanner
 against a known-shape target and confirming it reproduces what we can
@@ -272,6 +272,40 @@ are by-design informational:
 
 These don't fail the parity threshold and don't appear in the graph's
 attack-path queries.
+
+### Launch decision (2026-04-29): PASS
+
+The launch decision gate from the launch roadmap was the adversarial
+false-positive sweep — running the LLM scanner against ~10 random
+non-AI public repositories and confirming the verifier correctly
+rejects every spurious extraction the model proposes. The sweep
+completed 2026-04-29 with a clean PASS:
+
+- **9 repositories scanned**, spanning all three stacks: Python
+  (`black`, `click`, `bottle`), Java/Spring (`spring-petclinic`,
+  `spring-mvc-showcase`, `gs-rest-service`), Node/TS (`chalk`, `swr`,
+  `create-vue`).
+- **Zero LLM-scope nodes emitted across all 9 repos.** No `Tool`, no
+  `PromptTemplate`, no `RAGIndex`, no `MemoryStore` survived to the
+  graph for code that genuinely has none.
+- The verifier rejected every spurious candidate the model proposed;
+  the orchestrator's static-check rejections and the verifier's
+  second-LLM rejections combined to produce a clean output set.
+
+Combined with strict-match reconciliation against the real launch
+targets — `langchain4j-examples/customer-support-agent-example`
+(8 of 8 expected nodes, including two `@Tool`-annotated methods) and
+`vercel-labs/ai-sdk-preview-rag` (8 of 8, including three Vercel AI
+SDK `tool()` factory calls and a Drizzle pgvector embedding store) —
+this cleared Option C (LLM-assisted scanner) to ship as the launch
+headline rather than the ADR-0005 fallback ("preview" framing).
+
+The full sweep log is committed at
+[`docs/evidence/adversarial-sweep-2026-04-29.log`](evidence/adversarial-sweep-2026-04-29.log)
+for inspection. The runner script at
+[`scripts/run_adversarial_sweep.sh`](../scripts/run_adversarial_sweep.sh)
+is reproducible — drop new candidate repos under
+`~/clouddev/asp-demo-targets/sweep/` and re-run to update the sweep.
 
 ## Where to read more
 
